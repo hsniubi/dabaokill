@@ -72,23 +72,36 @@
     }
   }
 
+  async function fetchWithRetry(path) {
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      try {
+        await fetchAsset(path);
+        return;
+      } catch (error) {
+        if (attempt === 3) throw error;
+        await new Promise((resolve) => root.setTimeout(resolve, attempt * 600));
+      }
+    }
+  }
+
   async function run() {
     const all = manifest();
     const remaining = all.filter((path) => !urls.has(path));
     let cursor = 0;
     let done = urls.size;
     let failed = 0;
+    const failedPaths = [];
     notify(done, all.length);
     const worker = async () => {
       while (cursor < remaining.length) {
         const path = remaining[cursor++];
-        try { await fetchAsset(path); } catch (_) { failed += 1; }
+        try { await fetchWithRetry(path); } catch (_) { failed += 1; failedPaths.push(path); }
         done += 1;
         notify(done, all.length, failed);
       }
     };
     await Promise.all(Array.from({ length: Math.min(4, remaining.length) }, worker));
-    if (failed) throw new Error(`${failed} 个资源加载失败`);
+    if (failed) throw new Error(`${failed} 个资源加载失败：${failedPaths.slice(0, 2).join("、")}${failed > 2 ? " 等" : ""}`);
     root.DabaoAssetUrl = (path) => urls.get(path) || path;
     ready = true;
   }
