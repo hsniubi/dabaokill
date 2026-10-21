@@ -26,8 +26,10 @@
   let killFallbackTimer = null;
   let killStartWatchdogTimer = null;
   let killSceneSequence = 0;
-  let sceneImagesWarmed = false;
-  const sceneImageCache = [];
+  let loadingMode = null;
+  let loadingProgress = { done: 0, total: 0, failed: 0 };
+  let loadingError = null;
+  let loadingSequence = 0;
 
   const phaseNames = {
     select: "战备阶段", "ready-reveal": "展示阶段", resolve: "展示阶段",
@@ -36,27 +38,6 @@
 
   function img(src, className, alt = "") {
     return `<img class="${className}" src="${picture(src)}" alt="${alt}">`;
-  }
-
-  function warmSceneImages() {
-    if (sceneImagesWarmed || typeof window.Image !== "function" || window.DabaoAssetUrl) return;
-    sceneImagesWarmed = true;
-    const names = new Set([
-      ...CARDS.map((card) => card.image),
-      ...BOSS_CARDS.map((card) => card.image),
-      "victory.png", "fail.png", "tie.png",
-    ]);
-    const load = () => {
-      for (const name of names) {
-        const image = new window.Image();
-        image.decoding = "async";
-        image.fetchPriority = "low";
-        image.src = picture(name);
-        sceneImageCache.push(image);
-      }
-    };
-    if (window.requestIdleCallback) window.requestIdleCallback(load, { timeout: 1500 });
-    else load();
   }
 
   function tabs() {
@@ -102,6 +83,33 @@
           <p class="start-foot">44 张玩家牌 · 8 张大宝牌 · 三阶段回合</p>
         </div>
       </div>${tooltipHost}`;
+  }
+
+  function loadingScreen() {
+    const { done, total } = loadingProgress;
+    const percent = total ? Math.round(done / total * 100) : 0;
+    return `<section class="loading-screen" aria-label="游戏资源加载">
+      <div class="loading-panel">
+        <span class="section-kicker">DABAO KILL · PREPARING</span>
+        <h1>${loadingError ? "资源加载未完成" : "战场准备中"}</h1>
+        <p>${loadingError ? `${loadingError}。可以重试，或直接进入战场。` : "正在预加载卡牌、配音和演出视频。首次约需下载 12 MB，完成后自动进入战场。"}</p>
+        <progress class="loading-progress" max="${total || 1}" value="${done}" aria-label="资源加载进度"></progress>
+        <div class="loading-count"><strong>${percent}%</strong><span>${done} / ${total} 项资源</span></div>
+        <div class="loading-actions">${loadingError ? '<button class="primary-button" data-action="retry-loading">重试加载 ↗</button><button class="quiet-button" data-action="continue-loading">直接进入战场</button>' : ""}<button class="quiet-button" data-action="cancel-loading">返回首页</button></div>
+      </div>
+    </section>`;
+  }
+
+  function updateLoadingProgress(progress, sequence) {
+    if (sequence !== loadingSequence || !loadingMode) return;
+    loadingProgress = progress;
+    const bar = app.querySelector(".loading-progress");
+    if (bar) {
+      bar.max = progress.total || 1;
+      bar.value = progress.done;
+    }
+    const count = app.querySelector(".loading-count");
+    if (count) count.innerHTML = `<strong>${progress.total ? Math.round(progress.done / progress.total * 100) : 0}%</strong><span>${progress.done} / ${progress.total} 项资源</span>`;
   }
 
   function bossArea() {
@@ -229,8 +237,60 @@
       </main>`;
   }
 
+  function beginGame(mode, audioStarted = false) {
+    game = new Game(mode);
+    pendingSelection = null;
+    activeTab = "battle";
+    showResultScene = false;
+    showKillScene = false;
+    showPlayerFlipScene = false;
+    playerFlipCards = [];
+    if (playerFlipTimer !== null) clearTimeout(playerFlipTimer);
+    playerFlipTimer = null;
+    playerFlipSequence += 1;
+    showBossFlipScene = false;
+    bossFlipCards = [];
+    if (bossFlipTimer !== null) clearTimeout(bossFlipTimer);
+    bossFlipTimer = null;
+    bossFlipSequence += 1;
+    killVideoStarted = false;
+    killSoundStarted = false;
+    if (killStartWatchdogTimer !== null) clearTimeout(killStartWatchdogTimer);
+    killStartWatchdogTimer = null;
+    if (killFallbackTimer !== null) clearTimeout(killFallbackTimer);
+    killFallbackTimer = null;
+    killSceneSequence += 1;
+    sound.prepareAssets?.();
+    if (!audioStarted) sound.start();
+    render();
+  }
+
+  function startLoading(mode) {
+    loadingMode = mode;
+    loadingError = null;
+    loadingProgress = { done: 0, total: window.DabaoAssetLoader.manifest().length, failed: 0 };
+    const sequence = ++loadingSequence;
+    render();
+    window.DabaoAssetLoader.load((progress) => updateLoadingProgress(progress, sequence))
+      .then(() => {
+        if (sequence !== loadingSequence || !loadingMode) return;
+        loadingMode = null;
+        beginGame(mode, true);
+      })
+      .catch((error) => {
+        if (sequence !== loadingSequence || !loadingMode) return;
+        loadingError = error?.message || "网络异常";
+        render();
+      });
+  }
+
   function render() {
     activeTooltipTarget = null;
+    if (loadingMode) {
+      document.body.classList.remove("result-open");
+      app.innerHTML = loadingScreen();
+      return;
+    }
     if (!game) {
       document.body.classList.remove("result-open");
       if (activeTab === "rules") {
@@ -443,6 +503,21 @@
     if (!button) return;
     const action = button.dataset.action;
     const wasEnded = game?.phase === "ended";
+    if (loadingMode) {
+      if (action === "cancel-loading") {
+        loadingSequence += 1;
+        loadingMode = null;
+        sound.stop();
+        render();
+      } else if (action === "retry-loading" && loadingError) startLoading(loadingMode);
+      else if (action === "continue-loading" && loadingError) {
+        const mode = loadingMode;
+        loadingSequence += 1;
+        loadingMode = null;
+        beginGame(mode, true);
+      }
+      return;
+    }
     if (showPlayerFlipScene && !["skip-player-flip", "mute", "restart"].includes(action)) return;
     if (showBossFlipScene && !["skip-flip", "mute", "restart"].includes(action)) return;
     if (action === "tab-battle" || action === "tab-rules") {
@@ -454,29 +529,11 @@
       return;
     }
     if (action === "start") {
-      game = new Game(button.dataset.mode);
-      pendingSelection = null;
-      activeTab = "battle";
-      showResultScene = false;
-      showKillScene = false;
-      showPlayerFlipScene = false;
-      playerFlipCards = [];
-      if (playerFlipTimer !== null) clearTimeout(playerFlipTimer);
-      playerFlipTimer = null;
-      playerFlipSequence += 1;
-      showBossFlipScene = false;
-      bossFlipCards = [];
-      if (bossFlipTimer !== null) clearTimeout(bossFlipTimer);
-      bossFlipTimer = null;
-      bossFlipSequence += 1;
-      killVideoStarted = false;
-      killSoundStarted = false;
-      if (killStartWatchdogTimer !== null) clearTimeout(killStartWatchdogTimer);
-      killStartWatchdogTimer = null;
-      if (killFallbackTimer !== null) clearTimeout(killFallbackTimer);
-      killFallbackTimer = null;
-      killSceneSequence += 1;
-      sound.start();
+      if (window.DabaoAssetLoader?.needsLoading()) {
+        sound.start();
+        startLoading(button.dataset.mode);
+      } else beginGame(button.dataset.mode);
+      return;
     } else if (action === "restart") {
       app.querySelector(".kill-video")?.pause();
       sound.stop();
@@ -568,7 +625,6 @@
       sound.finish(game.result, game.mode, { humanPlayerId: game.humanPlayerId });
     }
     render();
-    if (action === "start") warmSceneImages();
     if (action === "close-result") app.querySelector('[data-action="replay-result"]')?.focus();
   });
 

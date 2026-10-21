@@ -51,6 +51,19 @@ h1, h2 { font-family: "Noto Serif SC", "Songti SC", "SimSun", serif; }
 .start-rules-link { margin-top: 24px; padding: 9px 0; color: var(--gold-light); background: transparent; border: 0; border-bottom: 1px solid rgba(217, 189, 124, .55); font-size: 13px; text-align: left; }
 .start-rules-link:hover { color: var(--paper-light); border-color: var(--paper-light); }
 
+.loading-screen { min-height: 100svh; display: grid; place-items: center; padding: 28px; background: radial-gradient(circle at 50% 35%, #355449, #14251f 65%, #0b1913); }
+.loading-panel { width: min(100%, 570px); padding: clamp(28px, 6vw, 54px); border: 1px solid rgba(217, 189, 124, .42); background: rgba(12, 29, 22, .88); box-shadow: 0 25px 90px rgba(0, 0, 0, .3); }
+.loading-panel h1 { margin: 18px 0 10px; font-size: clamp(30px, 6vw, 46px); letter-spacing: .08em; }
+.loading-panel p { min-height: 3.5em; margin: 0 0 24px; color: #c1d0c2; font-size: 13px; line-height: 1.75; }
+.loading-progress { width: 100%; height: 10px; overflow: hidden; border: 0; border-radius: 0; background: #263e32; }
+.loading-progress::-webkit-progress-bar { background: #263e32; }
+.loading-progress::-webkit-progress-value { background: linear-gradient(90deg, #ae8a49, #efcf85); }
+.loading-progress::-moz-progress-bar { background: linear-gradient(90deg, #ae8a49, #efcf85); }
+.loading-count { display: flex; justify-content: space-between; align-items: baseline; margin-top: 12px; color: var(--muted); font-size: 12px; }
+.loading-count strong { color: var(--gold-light); font: 28px Georgia, serif; }
+.loading-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
+.loading-actions button { min-height: 42px; }
+
 .game-shell { min-height: 100vh; background: radial-gradient(ellipse at 50% -15%, #2b5042 0, #1b3028 47%, #14251f 100%); }
 .topbar { max-width: 1520px; margin: auto; padding: 22px 38px; display: flex; justify-content: space-between; align-items: center; gap: 18px; border-bottom: 1px solid var(--line); }
 .topbar-left { display: flex; align-items: center; gap: clamp(20px, 4vw, 60px); }

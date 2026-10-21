@@ -10,7 +10,8 @@
       this.bgm.volume = 0.24;
       this.bgm.preload = "auto";
 
-      this.bossCue = new AudioType(assetUrl("voice/dabao1.mp3"));
+      this.bossCueAsset = assetUrl("voice/dabao1.mp3");
+      this.bossCue = new AudioType(this.bossCueAsset);
       this.bossCue.volume = 0.9;
       this.bossCue.preload = "auto";
       this.bossCue.addEventListener("ended", () => {
@@ -39,6 +40,14 @@
       this.bossCueId = 0;
       this.inGame = false;
       this.muted = false;
+    }
+
+    prepareAssets() {
+      const bossCueAsset = assetUrl("voice/dabao1.mp3");
+      if (bossCueAsset !== this.bossCueAsset) {
+        this.bossCueAsset = bossCueAsset;
+        this.bossCue.src = bossCueAsset;
+      }
     }
 
     play(audio, onFailure) {
