@@ -26,6 +26,8 @@
   let killFallbackTimer = null;
   let killStartWatchdogTimer = null;
   let killSceneSequence = 0;
+  let sceneImagesWarmed = false;
+  const sceneImageCache = [];
 
   const phaseNames = {
     select: "战备阶段", "ready-reveal": "展示阶段", resolve: "展示阶段",
@@ -34,6 +36,27 @@
 
   function img(src, className, alt = "") {
     return `<img class="${className}" src="${picture(src)}" alt="${alt}">`;
+  }
+
+  function warmSceneImages() {
+    if (sceneImagesWarmed || typeof window.Image !== "function" || window.DabaoAssetUrl) return;
+    sceneImagesWarmed = true;
+    const names = new Set([
+      ...CARDS.map((card) => card.image),
+      ...BOSS_CARDS.map((card) => card.image),
+      "victory.png", "fail.png", "tie.png",
+    ]);
+    const load = () => {
+      for (const name of names) {
+        const image = new window.Image();
+        image.decoding = "async";
+        image.fetchPriority = "low";
+        image.src = picture(name);
+        sceneImageCache.push(image);
+      }
+    };
+    if (window.requestIdleCallback) window.requestIdleCallback(load, { timeout: 1500 });
+    else load();
   }
 
   function tabs() {
@@ -545,6 +568,7 @@
       sound.finish(game.result, game.mode, { humanPlayerId: game.humanPlayerId });
     }
     render();
+    if (action === "start") warmSceneImages();
     if (action === "close-result") app.querySelector('[data-action="replay-result"]')?.focus();
   });
 
