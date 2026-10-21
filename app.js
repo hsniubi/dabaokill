@@ -96,8 +96,9 @@
   function loadingScreen() {
     const { done, total } = loadingProgress;
     const percent = total ? Math.round(done / total * 100) : 0;
+    const background = window.DabaoAssetLoader?.urlFor?.("picture/start.jpg") || picture("start.jpg");
     return `<section class="loading-screen" aria-label="游戏资源加载">
-      <img class="loading-background" src="${picture("start.jpg")}" alt="" aria-hidden="true">
+      <img class="loading-background" src="${background}" alt="" aria-hidden="true" fetchpriority="high">
       <div class="loading-panel">
         <span class="section-kicker">DABAO KILL · PREPARING</span>
         <h1>${loadingError ? "资源加载未完成" : "战场准备中"}</h1>
@@ -186,6 +187,9 @@
   function updateLoadingProgress(progress, sequence) {
     if (sequence !== loadingSequence || !loadingMode) return;
     loadingProgress = progress;
+    const background = app.querySelector(".loading-background");
+    const loadedBackground = window.DabaoAssetLoader.urlFor?.("picture/start.jpg");
+    if (background && loadedBackground && background.src !== loadedBackground) background.src = loadedBackground;
     const bar = app.querySelector(".loading-progress");
     if (bar) {
       bar.max = progress.total || 1;
