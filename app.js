@@ -125,7 +125,7 @@
     loadingMessageIndex = (loadingMessageIndex + 1) % loadingMessages.length;
     const message = app.querySelector(".loading-message");
     if (message) message.textContent = loadingMessages[loadingMessageIndex];
-    loadingMessageTimer = setTimeout(() => rotateLoadingMessage(sequence), 2400);
+    loadingMessageTimer = setTimeout(() => rotateLoadingMessage(sequence), 1800);
   }
 
   function bossArea() {
@@ -289,7 +289,7 @@
     loadingProgress = { done: 0, total: window.DabaoAssetLoader.manifest().length, failed: 0 };
     const sequence = ++loadingSequence;
     render();
-    loadingMessageTimer = setTimeout(() => rotateLoadingMessage(sequence), 2400);
+    loadingMessageTimer = setTimeout(() => rotateLoadingMessage(sequence), 1800);
     window.DabaoAssetLoader.load((progress) => updateLoadingProgress(progress, sequence))
       .then(() => {
         if (sequence !== loadingSequence || !loadingMode) return;
