@@ -3,7 +3,7 @@
 
   const EXTRA_PICTURES = [
     "dabao.jpg", "dabaobeimian.png", "wanjiabeimian.jpg", "gouyu.jpg",
-    "victory.png", "fail.png", "tie.png", "kill.jpg",
+    "victory.png", "fail.png", "tie.png", "kill.jpg", "start.jpg",
   ];
   const EXTRA_VOICES = [
     "background.mp3", "dabao1.mp3", "dabaokill.mp3", "victory.mp3", "fail.mp3",

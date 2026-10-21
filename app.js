@@ -92,6 +92,7 @@
     const { done, total } = loadingProgress;
     const percent = total ? Math.round(done / total * 100) : 0;
     return `<section class="loading-screen" aria-label="游戏资源加载">
+      <img class="loading-background" src="${picture("start.jpg")}" alt="" aria-hidden="true">
       <div class="loading-panel">
         <span class="section-kicker">DABAO KILL · PREPARING</span>
         <h1>${loadingError ? "资源加载未完成" : "战场准备中"}</h1>
