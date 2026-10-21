@@ -30,6 +30,9 @@
   let loadingProgress = { done: 0, total: 0, failed: 0 };
   let loadingError = null;
   let loadingSequence = 0;
+  const loadingMessages = ["大宝正在擦拭古锭刀...", "大宝正在喝酒...", "大宝正在打扫战场..."];
+  let loadingMessageIndex = 0;
+  let loadingMessageTimer = null;
 
   const phaseNames = {
     select: "战备阶段", "ready-reveal": "展示阶段", resolve: "展示阶段",
@@ -92,7 +95,7 @@
       <div class="loading-panel">
         <span class="section-kicker">DABAO KILL · PREPARING</span>
         <h1>${loadingError ? "资源加载未完成" : "战场准备中"}</h1>
-        <p>${loadingError ? `${loadingError}。可以重试，或直接进入战场。` : "正在预加载卡牌、配音和演出视频。首次约需下载 12 MB，完成后自动进入战场。"}</p>
+        <p class="loading-message">${loadingError ? `${loadingError}。可以重试，或直接进入战场。` : loadingMessages[loadingMessageIndex]}</p>
         <progress class="loading-progress" max="${total || 1}" value="${done}" aria-label="资源加载进度"></progress>
         <div class="loading-count"><strong>${percent}%</strong><span>${done} / ${total} 项资源</span></div>
         <div class="loading-actions">${loadingError ? '<button class="primary-button" data-action="retry-loading">重试加载 ↗</button><button class="quiet-button" data-action="continue-loading">直接进入战场</button>' : ""}<button class="quiet-button" data-action="cancel-loading">返回首页</button></div>
@@ -110,6 +113,19 @@
     }
     const count = app.querySelector(".loading-count");
     if (count) count.innerHTML = `<strong>${progress.total ? Math.round(progress.done / progress.total * 100) : 0}%</strong><span>${progress.done} / ${progress.total} 项资源</span>`;
+  }
+
+  function stopLoadingMessageRotation() {
+    if (loadingMessageTimer !== null) clearTimeout(loadingMessageTimer);
+    loadingMessageTimer = null;
+  }
+
+  function rotateLoadingMessage(sequence) {
+    if (sequence !== loadingSequence || !loadingMode || loadingError) return;
+    loadingMessageIndex = (loadingMessageIndex + 1) % loadingMessages.length;
+    const message = app.querySelector(".loading-message");
+    if (message) message.textContent = loadingMessages[loadingMessageIndex];
+    loadingMessageTimer = setTimeout(() => rotateLoadingMessage(sequence), 2400);
   }
 
   function bossArea() {
@@ -266,19 +282,24 @@
   }
 
   function startLoading(mode) {
+    stopLoadingMessageRotation();
     loadingMode = mode;
     loadingError = null;
+    loadingMessageIndex = 0;
     loadingProgress = { done: 0, total: window.DabaoAssetLoader.manifest().length, failed: 0 };
     const sequence = ++loadingSequence;
     render();
+    loadingMessageTimer = setTimeout(() => rotateLoadingMessage(sequence), 2400);
     window.DabaoAssetLoader.load((progress) => updateLoadingProgress(progress, sequence))
       .then(() => {
         if (sequence !== loadingSequence || !loadingMode) return;
+        stopLoadingMessageRotation();
         loadingMode = null;
         beginGame(mode, true);
       })
       .catch((error) => {
         if (sequence !== loadingSequence || !loadingMode) return;
+        stopLoadingMessageRotation();
         loadingError = error?.message || "网络异常";
         render();
       });
@@ -506,6 +527,7 @@
     if (loadingMode) {
       if (action === "cancel-loading") {
         loadingSequence += 1;
+        stopLoadingMessageRotation();
         loadingMode = null;
         sound.stop();
         render();
@@ -513,6 +535,7 @@
       else if (action === "continue-loading" && loadingError) {
         const mode = loadingMode;
         loadingSequence += 1;
+        stopLoadingMessageRotation();
         loadingMode = null;
         beginGame(mode, true);
       }
