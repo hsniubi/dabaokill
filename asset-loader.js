@@ -5,8 +5,9 @@
     "dabao.jpg", "dabaobeimian.png", "wanjiabeimian.jpg", "gouyu.jpg",
     "victory.png", "fail.png", "tie.png", "kill.jpg", "start.jpg",
   ];
+  // Background music starts from the user's click; preloading it again competes with playback.
   const EXTRA_VOICES = [
-    "background.mp3", "dabao1.mp3", "dabaokill.mp3", "victory.mp3", "fail.mp3",
+    "dabao1.mp3", "dabaokill.mp3", "victory.mp3", "fail.mp3",
   ];
   const urls = new Map();
   const decodedImages = [];
@@ -17,11 +18,11 @@
   function manifest() {
     const { CARDS, BOSS_CARDS } = root.DabaoKill;
     return [
+      "video/kill-browser.mp4",
       ...Array.from(new Set([...CARDS.map((card) => card.image), ...BOSS_CARDS.map((card) => card.image), ...EXTRA_PICTURES]),
         (name) => `picture/${name}`),
       ...Array.from(new Set([...CARDS.map((card) => `${card.key}.mp3`), ...EXTRA_VOICES]),
         (name) => `voice/${name}`),
-      "video/kill-browser.mp4",
     ];
   }
 
@@ -55,11 +56,33 @@
 
   async function fetchAsset(path) {
     const controller = typeof root.AbortController === "function" ? new root.AbortController() : null;
-    const timer = controller ? root.setTimeout(() => controller.abort(), 45000) : null;
+    let timer = null;
+    const armTimeout = (milliseconds = 45000) => {
+      if (!controller) return;
+      if (timer !== null) root.clearTimeout(timer);
+      timer = root.setTimeout(() => controller.abort(), milliseconds);
+    };
+    armTimeout();
     try {
       const response = await root.fetch(path, { cache: "force-cache", signal: controller?.signal });
       if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
-      const url = root.URL.createObjectURL(await response.blob());
+      let blob;
+      if (typeof response.body?.getReader === "function" && typeof root.Blob === "function") {
+        const reader = response.body.getReader();
+        const chunks = [];
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          chunks.push(value);
+          armTimeout();
+        }
+        blob = new root.Blob(chunks, { type: response.headers?.get?.("content-type") || "" });
+      } else {
+        if (path.startsWith("video/")) armTimeout(120000);
+        blob = await response.blob();
+      }
+      if (timer !== null) { root.clearTimeout(timer); timer = null; }
+      const url = root.URL.createObjectURL(blob);
       try {
         if (path.startsWith("picture/")) await decodeImage(url);
         urls.set(path, url);
