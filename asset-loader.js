@@ -14,6 +14,7 @@
   const listeners = new Set();
   let inFlight = null;
   let ready = false;
+  const requestUrl = (path) => path === "video/begin.mp4" ? `${path}?v=20261021j` : path;
 
   function manifest() {
     const { CARDS, BOSS_CARDS } = root.DabaoKill;
@@ -66,7 +67,7 @@
     };
     armTimeout();
     try {
-      const response = await root.fetch(path, { cache: "force-cache", signal: controller?.signal });
+      const response = await root.fetch(requestUrl(path), { cache: "force-cache", signal: controller?.signal });
       if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
       let blob;
       if (typeof response.body?.getReader === "function" && typeof root.Blob === "function") {
