@@ -35,6 +35,8 @@
   let loadingMessageTimer = null;
   let showBeginScene = false;
   let beginTimer = null;
+  let beginStartTimer = null;
+  let beginBgmVolume = null;
   let beginSequence = 0;
 
   const phaseNames = {
@@ -111,16 +113,63 @@
     const video = window.DabaoAssetUrl?.("video/begin.mp4") || "video/begin.mp4";
     return `<section class="begin-screen" aria-label="战局开始动画">
       <img class="begin-backdrop" src="${picture("start.jpg")}" alt="" aria-hidden="true">
-      <video class="begin-video" preload="auto" muted playsinline webkit-playsinline poster="${picture("start.jpg")}" aria-label="战局开始"><source src="${video}" type="video/mp4"></video>
+      <video class="begin-video" preload="auto" playsinline webkit-playsinline aria-label="战局开始"><source src="${video}" type="video/mp4"></video>
       <div class="begin-caption"><span>DABAO KILL</span><strong>战局开始</strong></div>
+      <div class="begin-play-prompt" hidden><button class="primary-button" data-action="play-begin">点击播放开场动画（含音效） ↗</button></div>
       <button class="begin-skip" data-action="skip-begin">跳过动画 ↗</button>
     </section>`;
+  }
+
+  function showBeginPlayPrompt(sequence) {
+    if (!showBeginScene || sequence !== beginSequence) return;
+    if (beginStartTimer !== null) clearTimeout(beginStartTimer);
+    beginStartTimer = null;
+    const prompt = app.querySelector(".begin-play-prompt");
+    if (prompt) prompt.hidden = false;
+  }
+
+  function beginPlaybackStarted(sequence) {
+    if (!showBeginScene || sequence !== beginSequence) return;
+    if (beginStartTimer !== null) clearTimeout(beginStartTimer);
+    beginStartTimer = null;
+    const prompt = app.querySelector(".begin-play-prompt");
+    if (prompt) prompt.hidden = true;
+    if (sound.bgm && beginBgmVolume === null) {
+      beginBgmVolume = sound.bgm.volume;
+      sound.bgm.volume = Math.min(beginBgmVolume, 0.06);
+    }
+    if (beginTimer === null) beginTimer = setTimeout(() => completeBeginScene(sequence), 8000);
+  }
+
+  function tryPlayBeginVideo(sequence) {
+    if (!showBeginScene || sequence !== beginSequence) return;
+    const video = app.querySelector(".begin-video");
+    if (typeof video?.play !== "function") return completeBeginScene(sequence);
+    video.muted = sound.muted;
+    if (beginStartTimer !== null) clearTimeout(beginStartTimer);
+    beginStartTimer = setTimeout(() => showBeginPlayPrompt(sequence), 6000);
+    try {
+      const playback = video.play();
+      if (playback && typeof playback.then === "function") {
+        playback.then(() => beginPlaybackStarted(sequence)).catch((error) => {
+          if (error?.name === "NotAllowedError") showBeginPlayPrompt(sequence);
+          else completeBeginScene(sequence);
+        });
+      } else beginPlaybackStarted(sequence);
+    } catch (error) {
+      if (error?.name === "NotAllowedError") showBeginPlayPrompt(sequence);
+      else completeBeginScene(sequence);
+    }
   }
 
   function completeBeginScene(sequence = beginSequence) {
     if (!showBeginScene || sequence !== beginSequence) return;
     if (beginTimer !== null) clearTimeout(beginTimer);
     beginTimer = null;
+    if (beginStartTimer !== null) clearTimeout(beginStartTimer);
+    beginStartTimer = null;
+    if (beginBgmVolume !== null && sound.bgm) sound.bgm.volume = beginBgmVolume;
+    beginBgmVolume = null;
     app.querySelector(".begin-video")?.pause?.();
     showBeginScene = false;
     beginSequence += 1;
@@ -132,16 +181,7 @@
     showBeginScene = true;
     const sequence = ++beginSequence;
     render();
-    const video = app.querySelector(".begin-video");
-    if (typeof video?.play !== "function") return completeBeginScene(sequence);
-    video.muted = true;
-    beginTimer = setTimeout(() => completeBeginScene(sequence), 8000);
-    try {
-      const playback = video.play();
-      if (playback && typeof playback.catch === "function") playback.catch(() => completeBeginScene(sequence));
-    } catch (_) {
-      completeBeginScene(sequence);
-    }
+    tryPlayBeginVideo(sequence);
   }
 
   function updateLoadingProgress(progress, sequence) {
@@ -297,6 +337,10 @@
   function beginGame(mode, audioStarted = false) {
     if (beginTimer !== null) clearTimeout(beginTimer);
     beginTimer = null;
+    if (beginStartTimer !== null) clearTimeout(beginStartTimer);
+    beginStartTimer = null;
+    if (beginBgmVolume !== null && sound.bgm) sound.bgm.volume = beginBgmVolume;
+    beginBgmVolume = null;
     showBeginScene = false;
     beginSequence += 1;
     game = new Game(mode);
@@ -593,6 +637,7 @@
     }
     if (showBeginScene) {
       if (action === "skip-begin") completeBeginScene();
+      else if (action === "play-begin") tryPlayBeginVideo(beginSequence);
       return;
     }
     if (showPlayerFlipScene && !["skip-player-flip", "mute", "restart"].includes(action)) return;
