@@ -66,9 +66,8 @@ h1, h2 { font-family: "Noto Serif SC", "Songti SC", "SimSun", serif; }
 .loading-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
 .loading-actions button { min-height: 42px; }
 
-.begin-screen { position: relative; width: 100%; height: 100svh; min-height: 320px; overflow: hidden; display: grid; place-items: center; background: #091712; }
-.begin-backdrop { position: absolute; inset: -20px; width: calc(100% + 40px); height: calc(100% + 40px); object-fit: cover; filter: blur(18px) brightness(.36); }
-.begin-video { position: relative; display: block; width: min(100vw, calc(100svh * 20 / 17), 960px); height: auto; max-height: 100svh; aspect-ratio: 20 / 17; object-fit: contain; background: #091712; box-shadow: 0 0 0 1px rgba(246, 237, 218, .16), 0 0 90px rgba(0, 0, 0, .5); }
+.begin-screen { position: relative; width: 100%; height: 100svh; min-height: 320px; overflow: hidden; background: #091712; }
+.begin-video { position: absolute; inset: 0; display: block; width: 100%; height: 100%; object-fit: cover; object-position: center; background: #091712; }
 .begin-caption { position: absolute; left: clamp(24px, 5vw, 80px); bottom: clamp(30px, 6vh, 72px); display: grid; gap: 8px; color: var(--paper-light); text-shadow: 0 2px 18px rgba(0, 0, 0, .8); pointer-events: none; }
 .begin-caption span { color: var(--gold-light); font: 700 12px Georgia, serif; letter-spacing: .24em; }
 .begin-caption strong { font: 700 clamp(28px, 5vw, 62px) "Noto Serif SC", "Songti SC", serif; letter-spacing: .12em; }

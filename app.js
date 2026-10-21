@@ -112,7 +112,6 @@
   function beginScreen() {
     const video = window.DabaoAssetUrl?.("video/begin.mp4") || "video/begin.mp4";
     return `<section class="begin-screen" aria-label="战局开始动画">
-      <img class="begin-backdrop" src="${picture("start.jpg")}" alt="" aria-hidden="true">
       <video class="begin-video" preload="auto" playsinline webkit-playsinline aria-label="战局开始"><source src="${video}" type="video/mp4"></video>
       <div class="begin-caption"><span>DABAO KILL</span><strong>战局开始</strong></div>
       <div class="begin-play-prompt" hidden><button class="primary-button" data-action="play-begin">点击播放开场动画（含音效） ↗</button></div>
