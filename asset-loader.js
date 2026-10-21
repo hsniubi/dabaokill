@@ -18,6 +18,7 @@
   function manifest() {
     const { CARDS, BOSS_CARDS } = root.DabaoKill;
     return [
+      "video/begin.mp4",
       "video/kill-browser.mp4",
       ...Array.from(new Set([...CARDS.map((card) => card.image), ...BOSS_CARDS.map((card) => card.image), ...EXTRA_PICTURES]),
         (name) => `picture/${name}`),

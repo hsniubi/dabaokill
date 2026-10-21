@@ -66,6 +66,15 @@ h1, h2 { font-family: "Noto Serif SC", "Songti SC", "SimSun", serif; }
 .loading-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 30px; }
 .loading-actions button { min-height: 42px; }
 
+.begin-screen { position: relative; width: 100%; height: 100svh; min-height: 320px; overflow: hidden; display: grid; place-items: center; background: #091712; }
+.begin-backdrop { position: absolute; inset: -20px; width: calc(100% + 40px); height: calc(100% + 40px); object-fit: cover; filter: blur(18px) brightness(.36); }
+.begin-video { position: relative; width: 100%; height: 100%; object-fit: contain; }
+.begin-caption { position: absolute; left: clamp(24px, 5vw, 80px); bottom: clamp(30px, 6vh, 72px); display: grid; gap: 8px; color: var(--paper-light); text-shadow: 0 2px 18px rgba(0, 0, 0, .8); pointer-events: none; }
+.begin-caption span { color: var(--gold-light); font: 700 12px Georgia, serif; letter-spacing: .24em; }
+.begin-caption strong { font: 700 clamp(28px, 5vw, 62px) "Noto Serif SC", "Songti SC", serif; letter-spacing: .12em; }
+.begin-skip { position: absolute; top: clamp(20px, 4vw, 48px); right: clamp(20px, 4vw, 56px); padding: 10px 16px; border: 1px solid rgba(246, 237, 218, .6); color: var(--paper-light); background: rgba(9, 23, 18, .62); font-size: 13px; }
+.begin-skip:hover { background: rgba(9, 23, 18, .88); border-color: var(--gold-light); }
+
 .game-shell { min-height: 100vh; background: radial-gradient(ellipse at 50% -15%, #2b5042 0, #1b3028 47%, #14251f 100%); }
 .topbar { max-width: 1520px; margin: auto; padding: 22px 38px; display: flex; justify-content: space-between; align-items: center; gap: 18px; border-bottom: 1px solid var(--line); }
 .topbar-left { display: flex; align-items: center; gap: clamp(20px, 4vw, 60px); }

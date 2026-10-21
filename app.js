@@ -33,6 +33,9 @@
   const loadingMessages = ["大宝正在擦拭古锭刀...", "大宝正在喝酒...", "大宝正在打扫战场..."];
   let loadingMessageIndex = 0;
   let loadingMessageTimer = null;
+  let showBeginScene = false;
+  let beginTimer = null;
+  let beginSequence = 0;
 
   const phaseNames = {
     select: "战备阶段", "ready-reveal": "展示阶段", resolve: "展示阶段",
@@ -102,6 +105,43 @@
         <div class="loading-actions">${loadingError ? '<button class="primary-button" data-action="retry-loading">重试加载 ↗</button><button class="quiet-button" data-action="continue-loading">直接进入战场</button>' : ""}<button class="quiet-button" data-action="cancel-loading">返回首页</button></div>
       </div>
     </section>`;
+  }
+
+  function beginScreen() {
+    const video = window.DabaoAssetUrl?.("video/begin.mp4") || "video/begin.mp4";
+    return `<section class="begin-screen" aria-label="战局开始动画">
+      <img class="begin-backdrop" src="${picture("start.jpg")}" alt="" aria-hidden="true">
+      <video class="begin-video" preload="auto" muted playsinline webkit-playsinline poster="${picture("start.jpg")}" aria-label="战局开始"><source src="${video}" type="video/mp4"></video>
+      <div class="begin-caption"><span>DABAO KILL</span><strong>战局开始</strong></div>
+      <button class="begin-skip" data-action="skip-begin">跳过动画 ↗</button>
+    </section>`;
+  }
+
+  function completeBeginScene(sequence = beginSequence) {
+    if (!showBeginScene || sequence !== beginSequence) return;
+    if (beginTimer !== null) clearTimeout(beginTimer);
+    beginTimer = null;
+    app.querySelector(".begin-video")?.pause?.();
+    showBeginScene = false;
+    beginSequence += 1;
+    render();
+  }
+
+  function startBeginScene() {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return render();
+    showBeginScene = true;
+    const sequence = ++beginSequence;
+    render();
+    const video = app.querySelector(".begin-video");
+    if (typeof video?.play !== "function") return completeBeginScene(sequence);
+    video.muted = true;
+    beginTimer = setTimeout(() => completeBeginScene(sequence), 8000);
+    try {
+      const playback = video.play();
+      if (playback && typeof playback.catch === "function") playback.catch(() => completeBeginScene(sequence));
+    } catch (_) {
+      completeBeginScene(sequence);
+    }
   }
 
   function updateLoadingProgress(progress, sequence) {
@@ -255,6 +295,10 @@
   }
 
   function beginGame(mode, audioStarted = false) {
+    if (beginTimer !== null) clearTimeout(beginTimer);
+    beginTimer = null;
+    showBeginScene = false;
+    beginSequence += 1;
     game = new Game(mode);
     pendingSelection = null;
     activeTab = "battle";
@@ -279,7 +323,7 @@
     killSceneSequence += 1;
     sound.prepareAssets?.();
     if (!audioStarted) sound.start();
-    render();
+    startBeginScene();
   }
 
   function startLoading(mode) {
@@ -311,6 +355,11 @@
     if (loadingMode) {
       document.body.classList.remove("result-open");
       app.innerHTML = loadingScreen();
+      return;
+    }
+    if (showBeginScene) {
+      document.body.classList.remove("result-open");
+      app.innerHTML = beginScreen();
       return;
     }
     if (!game) {
@@ -542,6 +591,10 @@
       }
       return;
     }
+    if (showBeginScene) {
+      if (action === "skip-begin") completeBeginScene();
+      return;
+    }
     if (showPlayerFlipScene && !["skip-player-flip", "mute", "restart"].includes(action)) return;
     if (showBossFlipScene && !["skip-flip", "mute", "restart"].includes(action)) return;
     if (action === "tab-battle" || action === "tab-rules") {
@@ -653,7 +706,8 @@
   });
 
   app.addEventListener("ended", (event) => {
-    if (event.target.classList?.contains("kill-video")) advanceKillScene();
+    if (event.target.classList?.contains("begin-video")) completeBeginScene();
+    else if (event.target.classList?.contains("kill-video")) advanceKillScene();
   }, true);
 
   app.addEventListener("playing", (event) => {
@@ -669,11 +723,13 @@
   }, true);
 
   app.addEventListener("error", (event) => {
-    if (event.target.classList?.contains("kill-video") && killVideoStarted) showKillFallback();
+    if (event.target.classList?.contains("begin-video")) completeBeginScene();
+    else if (event.target.classList?.contains("kill-video") && killVideoStarted) showKillFallback();
   }, true);
 
   document.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && showPlayerFlipScene) completePlayerReveal();
+    if (event.key === "Escape" && showBeginScene) completeBeginScene();
+    else if (event.key === "Escape" && showPlayerFlipScene) completePlayerReveal();
     else if (event.key === "Escape" && showBossFlipScene) completeBossStage();
     else if (event.key === "Escape" && showKillScene) advanceKillScene();
     else if (event.key === "Escape" && showResultScene) {
