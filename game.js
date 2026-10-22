@@ -59,6 +59,7 @@
       this.revealedThisRound = [];
       this.pendingChoice = null;
       this.activeCard = null;
+      this.recastEvent = null;
       this.bossDrawCount = 1;
       this.protectedThisRound = false;
       this.result = null;
@@ -263,6 +264,14 @@
         this.bossDeck.push(oldCard);
         const replacement = this.bossDeck.shift();
         this.bossDisplay.push(replacement);
+        this.recastEvent = {
+          actorId: choice.actorId,
+          sourceKey: this.activeCard?.key || null,
+          oldKey: oldCard.key,
+          newKey: replacement.key,
+          sameCard: oldCard.id === replacement.id,
+          deckRemaining: this.bossDeck.length,
+        };
         this.say(`${choice.actorId} 号重铸【${this.bossName(oldCard.key)}】，翻出【${this.bossName(replacement.key)}】。`);
       } else if (choice.kind === "reclaim") {
         const found = this.findDisplayed(optionId);

@@ -21,6 +21,9 @@
   let bossFlipCards = [];
   let bossFlipTimer = null;
   let bossFlipSequence = 0;
+  let recastSceneData = null;
+  let recastTimer = null;
+  let recastSequence = 0;
   let killVideoStarted = false;
   let killSoundStarted = false;
   let killFallbackTimer = null;
@@ -117,6 +120,26 @@
       <div class="begin-caption"><span>DABAO KILL</span><strong>战局开始</strong></div>
       <div class="begin-play-prompt" hidden><button class="primary-button" data-action="play-begin">点击播放开场动画（含音效） ↗</button></div>
       <button class="begin-skip" data-action="skip-begin">跳过动画 ↗</button>
+    </section>`;
+  }
+
+  function recastScreen() {
+    const { actorId, sourceKey, oldKey, newKey, sameCard, deckRemaining } = recastSceneData;
+    const oldCard = BOSS_MAP[oldKey];
+    const newCard = BOSS_MAP[newKey];
+    const skill = CARD_MAP[sourceKey]?.skill || "重铸";
+    return `<section class="recast-overlay" role="dialog" aria-modal="true" aria-label="大宝牌重铸演出" tabindex="-1">
+      <img class="recast-portrait" src="${picture("dabao.jpg")}" alt="" aria-hidden="true">
+      <header class="recast-header"><span>第 ${String(game.round).padStart(2, "0")} 回合 · ${actorId} 号玩家</span><h2>重铸大宝牌</h2><p>【${skill}】将已展示的牌放回牌堆底，再从牌堆顶翻开一张。</p></header>
+      <div class="recast-stage" aria-live="polite">
+        <div class="recast-stage-label recast-old-label"><span>放入牌堆底</span><strong>【${oldCard.name}】</strong></div>
+        <div class="recast-stage-label recast-deck-label"><span>牌堆顶 ↑</span><strong>大宝牌堆</strong><small>牌堆底 ↓</small></div>
+        <div class="recast-stage-label recast-new-label"><span>${sameCard ? "翻回原牌" : "翻出新牌"}</span><strong>【${newCard.name}】</strong></div>
+        <div class="recast-old-card"><img src="${picture(oldCard.image)}" alt="原牌${oldCard.name}"></div>
+        <div class="recast-deck-stack"><img src="${picture("dabaobeimian.png")}" alt="大宝牌堆"></div>
+        <div class="recast-new-card"><div class="recast-new-card-inner"><div class="recast-new-face recast-new-front"><img src="${picture(newCard.image)}" alt="新牌${newCard.name}"></div><div class="recast-new-face recast-new-back"><img src="${picture("dabaobeimian.png")}" alt="牌背"></div></div></div>
+      </div>
+      <footer class="recast-footer"><span>【${oldCard.name}】入底 → ${sameCard ? "牌堆已空，顶牌仍是原牌" : "牌堆顶翻出新牌"} · 牌堆剩 ${deckRemaining} 张</span><div><button data-action="mute" aria-pressed="${sound.muted}">${sound.muted ? "开启声音" : "静音"}</button><button data-action="skip-recast" aria-label="跳过重铸演出">跳过演出 ↗</button></div></footer>
     </section>`;
   }
 
@@ -367,6 +390,10 @@
     if (bossFlipTimer !== null) clearTimeout(bossFlipTimer);
     bossFlipTimer = null;
     bossFlipSequence += 1;
+    recastSceneData = null;
+    if (recastTimer !== null) clearTimeout(recastTimer);
+    recastTimer = null;
+    recastSequence += 1;
     killVideoStarted = false;
     killSoundStarted = false;
     if (killStartWatchdogTimer !== null) clearTimeout(killStartWatchdogTimer);
@@ -422,14 +449,34 @@
       } else openStart();
       return;
     }
-    const sceneOpen = showPlayerFlipScene || showBossFlipScene || (game.phase === "ended" && (showResultScene || showKillScene));
+    const sceneOpen = showPlayerFlipScene || showBossFlipScene || Boolean(recastSceneData) || (game.phase === "ended" && (showResultScene || showKillScene));
     document.body.classList.toggle("result-open", sceneOpen);
     app.innerHTML = `<div class="game-shell" ${sceneOpen ? 'inert aria-hidden="true"' : ""}>
       <header class="topbar"><div class="topbar-left"><div class="brand"><span class="brand-symbol">斩</span><div><strong>DABAO<span>KILL</span></strong><small>四人战大宝</small></div></div>${tabs()}</div>
       <div class="topbar-controls"><div class="turn-label"><span>第 ${String(game.round).padStart(2, "0")} 回合</span><strong>${phaseNames[game.phase]}</strong></div><button class="quiet-button sound-button" data-action="mute" aria-pressed="${sound.muted}">${sound.muted ? "开启声音" : "静音"}</button><button class="quiet-button" data-action="restart">新开一局 ↗</button></div></header>
       ${activeTab === "rules" ? rulesContent() : battleContent()}<footer>dabao<span>kill</span> · 单机版</footer>
-    </div>${showPlayerFlipScene ? window.DabaoPlayerFlipScene.render(game.round, playerFlipCards, picture, sound.muted) : showBossFlipScene ? window.DabaoBossFlipScene.render(game.round, bossFlipCards, game.bossDeck.length, picture, sound.muted) : showKillScene ? window.DabaoKillScene.render(game.round, sound.muted) : showResultScene ? window.DabaoResultScene.render(game, picture, outcomeFor, sound.muted) : ""}${tooltipHost}`;
-    if (sceneOpen) app.querySelector(".player-flip-overlay, .boss-flip-overlay, .kill-overlay, .result-overlay")?.focus();
+    </div>${recastSceneData ? recastScreen() : showPlayerFlipScene ? window.DabaoPlayerFlipScene.render(game.round, playerFlipCards, picture, sound.muted) : showBossFlipScene ? window.DabaoBossFlipScene.render(game.round, bossFlipCards, game.bossDeck.length, picture, sound.muted) : showKillScene ? window.DabaoKillScene.render(game.round, sound.muted) : showResultScene ? window.DabaoResultScene.render(game, picture, outcomeFor, sound.muted) : ""}${tooltipHost}`;
+    if (sceneOpen) app.querySelector(".recast-overlay, .player-flip-overlay, .boss-flip-overlay, .kill-overlay, .result-overlay")?.focus();
+  }
+
+  function completeRecastScene() {
+    if (!recastSceneData) return;
+    if (recastTimer !== null) clearTimeout(recastTimer);
+    recastTimer = null;
+    recastSequence += 1;
+    recastSceneData = null;
+    render();
+    app.querySelector('.decision-panel button')?.focus();
+  }
+
+  function startRecastScene(previousEvent) {
+    if (!game?.recastEvent || game.recastEvent === previousEvent) return;
+    recastSceneData = game.recastEvent;
+    const sequence = ++recastSequence;
+    const duration = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ? 1400 : 4000;
+    recastTimer = setTimeout(() => {
+      if (recastSceneData && recastSequence === sequence) completeRecastScene();
+    }, duration);
   }
 
   function completePlayerReveal() {
@@ -652,6 +699,7 @@
     }
     if (showPlayerFlipScene && !["skip-player-flip", "mute", "restart"].includes(action)) return;
     if (showBossFlipScene && !["skip-flip", "mute", "restart"].includes(action)) return;
+    if (recastSceneData && !["skip-recast", "mute", "restart"].includes(action)) return;
     if (action === "tab-battle" || action === "tab-rules") {
       if (showKillScene || showResultScene) return;
       activeTab = action === "tab-rules" ? "rules" : "battle";
@@ -685,6 +733,10 @@
       if (bossFlipTimer !== null) clearTimeout(bossFlipTimer);
       bossFlipTimer = null;
       bossFlipSequence += 1;
+      recastSceneData = null;
+      if (recastTimer !== null) clearTimeout(recastTimer);
+      recastTimer = null;
+      recastSequence += 1;
       killVideoStarted = false;
       killSoundStarted = false;
       if (killStartWatchdogTimer !== null) clearTimeout(killStartWatchdogTimer);
@@ -720,6 +772,10 @@
       if (showBossFlipScene) completeBossStage();
       return;
     }
+    else if (action === "skip-recast") {
+      completeRecastScene();
+      return;
+    }
     else if (action === "skip-player-flip") {
       completePlayerReveal();
       return;
@@ -738,14 +794,19 @@
     }
     else if (action === "choose") {
       const value = button.dataset.id;
-      game.choose(/^\d+$/.test(value) ? Number(value) : value);
+      const previousRecast = game.recastEvent;
+      if (game.choose(/^\d+$/.test(value) ? Number(value) : value)) startRecastScene(previousRecast);
     } else if (action === "reveal") {
       startPlayerReveal();
       return;
     }
     else if (action === "resolve") {
       const key = game.resolutionQueue[0]?.key;
-      if (game.resolveNext()) sound.playCard(key);
+      const previousRecast = game.recastEvent;
+      if (game.resolveNext()) {
+        sound.playCard(key);
+        startRecastScene(previousRecast);
+      }
     }
     else if (action === "boss" && game.phase === "ready-boss") {
       startBossStage();
@@ -784,6 +845,7 @@
 
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && showBeginScene) completeBeginScene();
+    else if (event.key === "Escape" && recastSceneData) completeRecastScene();
     else if (event.key === "Escape" && showPlayerFlipScene) completePlayerReveal();
     else if (event.key === "Escape" && showBossFlipScene) completeBossStage();
     else if (event.key === "Escape" && showKillScene) advanceKillScene();
