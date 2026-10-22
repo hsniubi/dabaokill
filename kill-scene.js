@@ -2,7 +2,7 @@
   "use strict";
 
   function render(round, muted) {
-    const video = root.DabaoAssetUrl?.("video/kill-browser.mp4") || "video/kill-browser.mp4";
+    const video = root.DabaoAssetUrl?.("video/kill-browser.mp4") || "video/kill-browser.mp4?v=20261022k";
     const fallback = root.DabaoAssetUrl?.("picture/kill.jpg") || "picture/kill.jpg";
     return `<section class="kill-overlay" role="dialog" aria-modal="true" aria-label="大宝击杀演出" tabindex="-1">
       <video class="kill-video" preload="auto" muted playsinline webkit-playsinline disablepictureinpicture aria-label="大宝击杀视频"><source src="${video}" type="video/mp4"></video>

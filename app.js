@@ -111,7 +111,7 @@
   }
 
   function beginScreen() {
-    const video = window.DabaoAssetUrl?.("video/begin.mp4") || "video/begin.mp4?v=20261021j";
+    const video = window.DabaoAssetUrl?.("video/begin.mp4") || "video/begin.mp4?v=20261022k";
     return `<section class="begin-screen" aria-label="战局开始动画">
       <video class="begin-video" preload="auto" playsinline webkit-playsinline aria-label="战局开始"><source src="${video}" type="video/mp4"></video>
       <div class="begin-caption"><span>DABAO KILL</span><strong>战局开始</strong></div>
@@ -136,7 +136,7 @@
     if (prompt) prompt.hidden = true;
     if (sound.bgm && beginBgmVolume === null) {
       beginBgmVolume = sound.bgm.volume;
-      sound.bgm.volume = Math.min(beginBgmVolume, 0.06);
+      sound.bgm.volume = Math.min(beginBgmVolume, 0.12);
     }
     if (beginTimer === null) beginTimer = setTimeout(() => completeBeginScene(sequence), 8000);
   }
@@ -174,10 +174,16 @@
     showBeginScene = false;
     beginSequence += 1;
     render();
+    sound.ensureBackground?.();
+    window.DabaoAssetLoader?.warmOptional?.();
   }
 
   function startBeginScene() {
-    if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) return render();
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches) {
+      render();
+      window.DabaoAssetLoader?.warmOptional?.();
+      return;
+    }
     showBeginScene = true;
     const sequence = ++beginSequence;
     render();
@@ -620,6 +626,7 @@
     const button = event.target.closest("[data-action]");
     if (!button) return;
     const action = button.dataset.action;
+    if (!["start", "mute", "restart", "cancel-loading"].includes(action)) sound.ensureBackground?.();
     const wasEnded = game?.phase === "ended";
     if (loadingMode) {
       if (action === "cancel-loading") {

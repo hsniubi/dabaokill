@@ -1,7 +1,11 @@
 (function (root) {
   "use strict";
 
-  const assetUrl = (path) => root.DabaoAssetUrl?.(path) || path;
+  const assetUrl = (path) => {
+    const embedded = root.DabaoAssetUrl?.(path);
+    if (embedded && embedded !== path) return embedded;
+    return path === "voice/background.mp3" ? "voice/background.m4a?v=20261022k" : path;
+  };
 
   class GameAudio {
     constructor(AudioType = root.Audio) {
@@ -9,6 +13,17 @@
       this.bgm.loop = true;
       this.bgm.volume = 0.24;
       this.bgm.preload = "auto";
+      this.bgmRetryTimer = null;
+      this.bgmRetryCount = 0;
+      this.bgmPlayAttempt = 0;
+      this.bgm.addEventListener("playing", () => {
+        this.clearBackgroundRetry();
+        this.bgmRetryCount = 0;
+      });
+      this.bgm.addEventListener("canplay", () => this.ensureBackground());
+      this.bgm.addEventListener("error", () => this.queueBackgroundRetry());
+      this.bgm.addEventListener("stalled", () => this.queueBackgroundRetry(5000));
+      this.bgm.addEventListener("waiting", () => this.queueBackgroundRetry(5000));
 
       this.bossCueAsset = assetUrl("voice/dabao1.mp3");
       this.bossCue = new AudioType(this.bossCueAsset);
@@ -40,6 +55,36 @@
       this.bossCueId = 0;
       this.inGame = false;
       this.muted = false;
+      root.document?.addEventListener?.("visibilitychange", () => {
+        if (!root.document.hidden) this.ensureBackground();
+      });
+    }
+
+    clearBackgroundRetry() {
+      if (this.bgmRetryTimer !== null) clearTimeout(this.bgmRetryTimer);
+      this.bgmRetryTimer = null;
+    }
+
+    queueBackgroundRetry(minDelay = 0) {
+      if (!this.inGame || this.muted || this.bgmRetryTimer !== null || this.bgmRetryCount >= 3) return;
+      const delay = Math.max(minDelay, 800 * 2 ** this.bgmRetryCount);
+      this.bgmRetryCount += 1;
+      this.bgmRetryTimer = setTimeout(() => {
+        this.bgmRetryTimer = null;
+        if (!this.inGame || this.muted) return;
+        if (this.bgm.error || (typeof this.bgm.readyState === "number" && this.bgm.readyState < 2)) {
+          try { this.bgm.load?.(); } catch (_) { /* A later user click can retry playback. */ }
+        }
+        this.ensureBackground(true);
+      }, delay);
+    }
+
+    ensureBackground(force = false) {
+      if (!this.inGame || this.muted || (!force && this.bgm.paused === false && !this.bgm.error)) return;
+      const attempt = ++this.bgmPlayAttempt;
+      this.play(this.bgm, () => {
+        if (attempt === this.bgmPlayAttempt) this.queueBackgroundRetry();
+      });
     }
 
     prepareAssets() {
@@ -62,12 +107,15 @@
     start() {
       this.stop();
       this.inGame = true;
+      this.bgmRetryCount = 0;
       this.bgm.currentTime = 0;
-      if (!this.muted) this.play(this.bgm);
+      this.ensureBackground();
     }
 
     stop() {
       this.inGame = false;
+      this.clearBackgroundRetry();
+      this.bgmPlayAttempt += 1;
       this.bgm.pause();
       this.bossCue.pause();
       this.bossCuePlaying = false;
@@ -169,6 +217,8 @@
     setMuted(muted) {
       this.muted = Boolean(muted);
       if (this.muted) {
+        this.clearBackgroundRetry();
+        this.bgmPlayAttempt += 1;
         this.bgm.pause();
         this.bossCue.pause();
         this.completeBossCue();
@@ -178,7 +228,8 @@
         this.currentVoiceFile = null;
         this.playbackId += 1;
       } else if (this.inGame) {
-        this.play(this.bgm);
+        this.bgmRetryCount = 0;
+        this.ensureBackground();
       }
     }
   }

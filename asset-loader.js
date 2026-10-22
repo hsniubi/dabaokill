@@ -9,14 +9,21 @@
   const EXTRA_VOICES = [
     "dabao1.mp3", "dabaokill.mp3", "victory.mp3", "fail.mp3",
   ];
+  const OPTIONAL_ASSETS = [
+    "video/kill-browser.mp4",
+    "picture/kill.jpg", "picture/victory.png", "picture/fail.png", "picture/tie.png",
+    "voice/dabaokill.mp3", "voice/victory.mp3", "voice/fail.mp3",
+  ];
+  const optionalPaths = new Set(OPTIONAL_ASSETS);
   const urls = new Map();
   const decodedImages = [];
   const listeners = new Set();
   let inFlight = null;
+  let optionalInFlight = null;
   let ready = false;
-  const requestUrl = (path) => path === "video/begin.mp4" ? `${path}?v=20261021j` : path;
+  const requestUrl = (path) => path.startsWith("video/") ? `${path}?v=20261022k` : path;
 
-  function manifest() {
+  function allManifest() {
     const { CARDS, BOSS_CARDS } = root.DabaoKill;
     return [
       "picture/start.jpg",
@@ -27,6 +34,10 @@
       ...Array.from(new Set([...CARDS.map((card) => `${card.key}.mp3`), ...EXTRA_VOICES]),
         (name) => `voice/${name}`),
     ];
+  }
+
+  function manifest() {
+    return allManifest().filter((path) => !optionalPaths.has(path));
   }
 
   function needsLoading() {
@@ -57,7 +68,7 @@
     decodedImages.push(image);
   }
 
-  async function fetchAsset(path) {
+  async function fetchAsset(path, lowPriority = false) {
     const controller = typeof root.AbortController === "function" ? new root.AbortController() : null;
     let timer = null;
     const armTimeout = (milliseconds = 45000) => {
@@ -67,7 +78,9 @@
     };
     armTimeout();
     try {
-      const response = await root.fetch(requestUrl(path), { cache: "force-cache", signal: controller?.signal });
+      const response = await root.fetch(requestUrl(path), {
+        cache: "force-cache", signal: controller?.signal, ...(lowPriority ? { priority: "low" } : {}),
+      });
       if (!response.ok) throw new Error(`${path}: HTTP ${response.status}`);
       let blob;
       if (typeof response.body?.getReader === "function" && typeof root.Blob === "function") {
@@ -98,10 +111,10 @@
     }
   }
 
-  async function fetchWithRetry(path) {
+  async function fetchWithRetry(path, lowPriority = false) {
     for (let attempt = 1; attempt <= 3; attempt += 1) {
       try {
-        await fetchAsset(path);
+        await fetchAsset(path, lowPriority);
         return;
       } catch (error) {
         if (attempt === 3) throw error;
@@ -134,8 +147,19 @@
     };
     await Promise.all(Array.from({ length: Math.min(4, remaining.length) }, worker));
     if (failed) throw new Error(`${failed} 个资源加载失败：${failedPaths.slice(0, 2).join("、")}${failed > 2 ? " 等" : ""}`);
-    root.DabaoAssetUrl = (path) => urls.get(path) || path;
+    root.DabaoAssetUrl = (path) => urls.get(path) || requestUrl(path);
     ready = true;
+  }
+
+  function warmOptional() {
+    if (!ready) return Promise.resolve();
+    if (!optionalInFlight) optionalInFlight = (async () => {
+      for (const path of OPTIONAL_ASSETS) {
+        if (urls.has(path)) continue;
+        try { await fetchWithRetry(path, true); } catch (_) { /* The original URL remains playable. */ }
+      }
+    })().finally(() => { optionalInFlight = null; });
+    return optionalInFlight;
   }
 
   function load(onProgress) {
@@ -150,7 +174,7 @@
   }
 
   const urlFor = (path) => urls.get(path) || null;
-  const api = { manifest, needsLoading, load, urlFor };
+  const api = { manifest, needsLoading, load, warmOptional, urlFor };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
   root.DabaoAssetLoader = api;
 })(typeof window !== "undefined" ? window : globalThis);
