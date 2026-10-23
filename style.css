@@ -155,6 +155,17 @@ main { max-width: 1520px; padding: 0 38px 50px; margin: auto; }
 .boss-card-meta strong { display: block; font: 700 18px "Noto Serif SC", "Songti SC", serif; white-space: nowrap; }
 .boss-card-meta span { display: block; margin-top: 8px; color: var(--muted); font: 13px Georgia, serif; }
 .boss-footnote { margin-top: 16px; color: var(--muted); font-size: 12px; }
+.boss-sticky { position: fixed; inset: 0 0 auto; z-index: 80; border-bottom: 1px solid rgba(217, 189, 124, .52); background: rgba(13, 31, 24, .94); box-shadow: 0 12px 30px rgba(0, 0, 0, .36); backdrop-filter: blur(12px); opacity: 0; visibility: hidden; transform: translateY(-100%); transition: opacity .2s, transform .2s, visibility .2s; pointer-events: none; }
+.boss-sticky.is-visible { opacity: 1; visibility: visible; transform: translateY(0); }
+.boss-sticky-inner { max-width: 1520px; min-height: 82px; margin: auto; padding: 7px 38px; display: flex; align-items: center; gap: 28px; }
+.boss-sticky-title { flex: 0 0 auto; color: var(--gold-light); font: 700 15px "Noto Serif SC", "Songti SC", serif; white-space: nowrap; }
+.boss-sticky-cards { display: flex; align-items: center; gap: clamp(16px, 3vw, 45px); }
+.boss-sticky-card { display: flex; align-items: center; gap: 9px; min-width: 0; opacity: .55; }
+.boss-sticky-card.has-card { opacity: 1; }
+.boss-sticky-image { width: 45px; height: 62px; flex: 0 0 45px; border: 1px solid rgba(217, 189, 124, .72); object-fit: cover; }
+.boss-sticky-card span { display: grid; gap: 4px; white-space: nowrap; }
+.boss-sticky-card strong { font: 700 14px "Noto Serif SC", "Songti SC", serif; }
+.boss-sticky-card small { color: var(--muted); font: 12px Georgia, serif; }
 .boss-pile { align-self: center; justify-self: center; display: flex; flex-direction: column; align-items: center; color: var(--muted); font-size: 11px; white-space: nowrap; }
 .boss-pile-art { width: 75px; height: 106px; padding: 3px; background: #ddd0ae; transform: rotate(6deg); box-shadow: -4px 4px 0 #b4a078, -8px 8px 0 #706348; }
 .boss-pile-image { width: 100%; height: 100%; object-fit: cover; }
@@ -506,6 +517,13 @@ footer span { color: var(--gold-light); }
   .boss-pile-art { display: none; }
   .boss-pile strong { margin: 0; font-size: 16px; }
   .boss-footnote { margin-top: 10px; font-size: 10px; }
+  .boss-sticky-inner { min-height: 65px; padding: 6px 16px; gap: 8px; }
+  .boss-sticky-title { display: none; }
+  .boss-sticky-cards { width: 100%; justify-content: space-between; gap: 6px; }
+  .boss-sticky-card { gap: 5px; }
+  .boss-sticky-image { width: 34px; height: 47px; flex-basis: 34px; }
+  .boss-sticky-card strong { font-size: 11px; }
+  .boss-sticky-card small { font-size: 10px; }
   .section-aside { display: none; }
   .player-panel { min-height: 205px; }
   .player-top { padding: 10px; }

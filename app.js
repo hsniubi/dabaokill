@@ -244,8 +244,35 @@
     loadingMessageTimer = setTimeout(() => rotateLoadingMessage(sequence), 1800);
   }
 
+  function bossCounts() {
+    return Object.fromEntries(BOSS_CARDS.map((card) => [card.key, game.bossDisplay.filter((entry) => entry.key === card.key).length]));
+  }
+
+  function bossStickyBar() {
+    if (!game.bossDisplay.length) return "";
+    const counts = bossCounts();
+    return `<aside class="boss-sticky" aria-label="当前已展示的大宝牌" aria-hidden="true">
+      <div class="boss-sticky-inner"><strong class="boss-sticky-title">大宝已展示</strong>
+        <div class="boss-sticky-cards">${BOSS_CARDS.map((card) => `<div class="boss-sticky-card ${counts[card.key] ? "has-card" : ""}">
+          ${img(counts[card.key] ? card.image : "dabaobeimian.png", "boss-sticky-image", counts[card.key] ? card.name : "未展示")}
+          <span><strong>${card.name}</strong><small>${counts[card.key]} / ${card.count}</small></span>
+        </div>`).join("")}</div>
+      </div>
+    </aside>`;
+  }
+
+  function updateBossStickyBar() {
+    const bar = app.querySelector(".boss-sticky");
+    const cards = app.querySelector(".boss-set");
+    if (!bar || !cards) return;
+    const sceneOpen = showPlayerFlipScene || Boolean(skillSceneEntry) || showBossFlipScene || Boolean(recastSceneData) || (game?.phase === "ended" && (showResultScene || showKillScene));
+    const visible = !sceneOpen && cards.getBoundingClientRect().bottom <= 0;
+    bar.classList.toggle("is-visible", visible);
+    bar.setAttribute("aria-hidden", String(!visible));
+  }
+
   function bossArea() {
-    const counts = Object.fromEntries(BOSS_CARDS.map((card) => [card.key, game.bossDisplay.filter((entry) => entry.key === card.key).length]));
+    const counts = bossCounts();
     return `<section class="boss-zone" aria-label="大宝区域">
       <div class="boss-portrait">${img("dabao.jpg", "boss-image", "大宝立绘")}<div class="boss-name">大宝 <small>敌方</small></div></div>
       <div class="boss-information">
@@ -361,6 +388,7 @@
   function battleContent() {
     return `<main id="battle-panel" role="tabpanel" aria-labelledby="tab-battle"><div class="section-heading"><div><span class="section-kicker">BOSS ZONE</span><h1>大宝阵前</h1></div><div class="deck-counter"><span>玩家牌堆</span><strong>${game.playerDeck.length}</strong><small>/ 44</small></div></div>
       ${bossArea()}
+      ${bossStickyBar()}
       <div class="section-heading players-heading"><div><span class="section-kicker">PLAYER FIELD</span><h2>四方战阵</h2></div><span class="section-aside">率先达到 11 勾玉，即可击败大宝</span></div>
       <section class="players-grid" aria-label="玩家区域">${game.players.map(playerPanel).join("")}</section>
       ${handDock()}
@@ -463,6 +491,7 @@
       <div class="topbar-controls"><div class="turn-label"><span>第 ${String(game.round).padStart(2, "0")} 回合</span><strong>${phaseNames[game.phase]}</strong></div><button class="quiet-button sound-button" data-action="mute" aria-pressed="${sound.muted}">${sound.muted ? "开启声音" : "静音"}</button><button class="quiet-button" data-action="restart">新开一局 ↗</button></div></header>
       ${activeTab === "rules" ? rulesContent() : battleContent()}<footer>dabao<span>kill</span> · 单机版</footer>
     </div>${recastSceneData ? recastScreen() : showPlayerFlipScene ? window.DabaoPlayerFlipScene.render(game.round, playerFlipCards, picture, sound.muted) : skillSceneEntry ? window.DabaoSkillScene.render(game.round, skillSceneEntry, CARD_MAP[skillSceneEntry.key], picture, sound.muted) : showBossFlipScene ? window.DabaoBossFlipScene.render(game.round, bossFlipCards, game.bossDeck.length, picture, sound.muted) : showKillScene ? window.DabaoKillScene.render(game.round, sound.muted) : showResultScene ? window.DabaoResultScene.render(game, picture, outcomeFor, sound.muted) : ""}${tooltipHost}`;
+    if (activeTab === "battle" && !sceneOpen) updateBossStickyBar();
     if (sceneOpen) app.querySelector(".recast-overlay, .player-flip-overlay, .skill-overlay, .boss-flip-overlay, .kill-overlay, .result-overlay")?.focus();
   }
 
@@ -901,5 +930,7 @@
     if (event.target.classList?.contains("rules-panel")) showRules = event.target.open;
   }, true);
 
+  window.addEventListener?.("scroll", updateBossStickyBar, { passive: true });
+  window.addEventListener?.("resize", updateBossStickyBar);
   render();
 })();
