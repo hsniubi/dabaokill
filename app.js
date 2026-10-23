@@ -4,7 +4,7 @@
   const { Game, CARDS, CARD_MAP, BOSS_CARDS, BOSS_MAP, outcomeFor } = window.DabaoKill;
   const sound = new window.DabaoAudio.GameAudio();
   const app = document.getElementById("app");
-  const picture = (name) => window.DabaoAssetUrl?.(`picture/${name}`) || `picture/${encodeURIComponent(name)}`;
+  const picture = (name) => window.DabaoAssetUrl?.(`picture/${name}`) || `picture/${name.split("/").map(encodeURIComponent).join("/")}`;
   const signed = (number) => number > 0 ? `+${number}` : String(number);
   let game = null;
   let pendingSelection = null;
@@ -17,6 +17,9 @@
   let playerFlipCards = [];
   let playerFlipTimer = null;
   let playerFlipSequence = 0;
+  let skillSceneEntry = null;
+  let skillSceneTimer = null;
+  let skillSceneSequence = 0;
   let showBossFlipScene = false;
   let bossFlipCards = [];
   let bossFlipTimer = null;
@@ -385,6 +388,10 @@
     if (playerFlipTimer !== null) clearTimeout(playerFlipTimer);
     playerFlipTimer = null;
     playerFlipSequence += 1;
+    skillSceneEntry = null;
+    if (skillSceneTimer !== null) clearTimeout(skillSceneTimer);
+    skillSceneTimer = null;
+    skillSceneSequence += 1;
     showBossFlipScene = false;
     bossFlipCards = [];
     if (bossFlipTimer !== null) clearTimeout(bossFlipTimer);
@@ -449,14 +456,14 @@
       } else openStart();
       return;
     }
-    const sceneOpen = showPlayerFlipScene || showBossFlipScene || Boolean(recastSceneData) || (game.phase === "ended" && (showResultScene || showKillScene));
+    const sceneOpen = showPlayerFlipScene || Boolean(skillSceneEntry) || showBossFlipScene || Boolean(recastSceneData) || (game.phase === "ended" && (showResultScene || showKillScene));
     document.body.classList.toggle("result-open", sceneOpen);
     app.innerHTML = `<div class="game-shell" ${sceneOpen ? 'inert aria-hidden="true"' : ""}>
       <header class="topbar"><div class="topbar-left"><div class="brand"><span class="brand-symbol">斩</span><div><strong>DABAO<span>KILL</span></strong><small>四人战大宝</small></div></div>${tabs()}</div>
       <div class="topbar-controls"><div class="turn-label"><span>第 ${String(game.round).padStart(2, "0")} 回合</span><strong>${phaseNames[game.phase]}</strong></div><button class="quiet-button sound-button" data-action="mute" aria-pressed="${sound.muted}">${sound.muted ? "开启声音" : "静音"}</button><button class="quiet-button" data-action="restart">新开一局 ↗</button></div></header>
       ${activeTab === "rules" ? rulesContent() : battleContent()}<footer>dabao<span>kill</span> · 单机版</footer>
-    </div>${recastSceneData ? recastScreen() : showPlayerFlipScene ? window.DabaoPlayerFlipScene.render(game.round, playerFlipCards, picture, sound.muted) : showBossFlipScene ? window.DabaoBossFlipScene.render(game.round, bossFlipCards, game.bossDeck.length, picture, sound.muted) : showKillScene ? window.DabaoKillScene.render(game.round, sound.muted) : showResultScene ? window.DabaoResultScene.render(game, picture, outcomeFor, sound.muted) : ""}${tooltipHost}`;
-    if (sceneOpen) app.querySelector(".recast-overlay, .player-flip-overlay, .boss-flip-overlay, .kill-overlay, .result-overlay")?.focus();
+    </div>${recastSceneData ? recastScreen() : showPlayerFlipScene ? window.DabaoPlayerFlipScene.render(game.round, playerFlipCards, picture, sound.muted) : skillSceneEntry ? window.DabaoSkillScene.render(game.round, skillSceneEntry, CARD_MAP[skillSceneEntry.key], picture, sound.muted) : showBossFlipScene ? window.DabaoBossFlipScene.render(game.round, bossFlipCards, game.bossDeck.length, picture, sound.muted) : showKillScene ? window.DabaoKillScene.render(game.round, sound.muted) : showResultScene ? window.DabaoResultScene.render(game, picture, outcomeFor, sound.muted) : ""}${tooltipHost}`;
+    if (sceneOpen) app.querySelector(".recast-overlay, .player-flip-overlay, .skill-overlay, .boss-flip-overlay, .kill-overlay, .result-overlay")?.focus();
   }
 
   function completeRecastScene() {
@@ -476,6 +483,34 @@
     const duration = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ? 1400 : 4000;
     recastTimer = setTimeout(() => {
       if (recastSceneData && recastSequence === sequence) completeRecastScene();
+    }, duration);
+  }
+
+  function completeSkillScene() {
+    if (!skillSceneEntry) return;
+    if (skillSceneTimer !== null) clearTimeout(skillSceneTimer);
+    skillSceneTimer = null;
+    skillSceneSequence += 1;
+    skillSceneEntry = null;
+    const previousRecast = game.recastEvent;
+    if (game.resolveNext()) startRecastScene(previousRecast);
+    if (game.phase === "ended") {
+      showResultScene = true;
+      sound.finish(game.result, game.mode, { humanPlayerId: game.humanPlayerId });
+    }
+    render();
+    if (game.phase === "choice" && !recastSceneData) app.querySelector(".decision-panel button")?.focus();
+  }
+
+  function startSkillScene() {
+    if (game?.phase !== "resolve" || !game.resolutionQueue.length) return;
+    skillSceneEntry = { key: game.resolutionQueue[0].key, ownerId: game.resolutionQueue[0].ownerId };
+    sound.playCard(skillSceneEntry.key);
+    render();
+    const sequence = ++skillSceneSequence;
+    const duration = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ? 650 : 1900;
+    skillSceneTimer = setTimeout(() => {
+      if (skillSceneEntry && skillSceneSequence === sequence) completeSkillScene();
     }, duration);
   }
 
@@ -698,6 +733,7 @@
       return;
     }
     if (showPlayerFlipScene && !["skip-player-flip", "mute", "restart"].includes(action)) return;
+    if (skillSceneEntry && !["skip-skill", "mute", "restart"].includes(action)) return;
     if (showBossFlipScene && !["skip-flip", "mute", "restart"].includes(action)) return;
     if (recastSceneData && !["skip-recast", "mute", "restart"].includes(action)) return;
     if (action === "tab-battle" || action === "tab-rules") {
@@ -728,6 +764,10 @@
       if (playerFlipTimer !== null) clearTimeout(playerFlipTimer);
       playerFlipTimer = null;
       playerFlipSequence += 1;
+      skillSceneEntry = null;
+      if (skillSceneTimer !== null) clearTimeout(skillSceneTimer);
+      skillSceneTimer = null;
+      skillSceneSequence += 1;
       showBossFlipScene = false;
       bossFlipCards = [];
       if (bossFlipTimer !== null) clearTimeout(bossFlipTimer);
@@ -780,6 +820,10 @@
       completePlayerReveal();
       return;
     }
+    else if (action === "skip-skill") {
+      completeSkillScene();
+      return;
+    }
     else if (action === "select") {
       const playerId = Number(button.dataset.player);
       const cardId = Number(button.dataset.id);
@@ -801,12 +845,8 @@
       return;
     }
     else if (action === "resolve") {
-      const key = game.resolutionQueue[0]?.key;
-      const previousRecast = game.recastEvent;
-      if (game.resolveNext()) {
-        sound.playCard(key);
-        startRecastScene(previousRecast);
-      }
+      startSkillScene();
+      return;
     }
     else if (action === "boss" && game.phase === "ready-boss") {
       startBossStage();
@@ -847,6 +887,7 @@
     if (event.key === "Escape" && showBeginScene) completeBeginScene();
     else if (event.key === "Escape" && recastSceneData) completeRecastScene();
     else if (event.key === "Escape" && showPlayerFlipScene) completePlayerReveal();
+    else if (event.key === "Escape" && skillSceneEntry) completeSkillScene();
     else if (event.key === "Escape" && showBossFlipScene) completeBossStage();
     else if (event.key === "Escape" && showKillScene) advanceKillScene();
     else if (event.key === "Escape" && showResultScene) {

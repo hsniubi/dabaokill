@@ -2,16 +2,16 @@
   "use strict";
 
   const CARDS = [
-    { key: "caochong", name: "曹冲", value: -3, count: 3, skill: "仁心", description: "若大宝牌堆有牌，本回合大宝不会击杀玩家。", image: "caochong.jpg" },
-    { key: "caoang", name: "曹昂", value: -2, count: 5, skill: "慷慨", description: "重铸一张未重复的大宝牌；没有则不重铸。", image: "caoang.jpg" },
-    { key: "youpangtong", name: "友庞统", value: -1, count: 4, skill: "漫卷", description: "收回自己一张非本回合的展示牌。", image: "youpangtong.jpg" },
-    { key: "quyi", name: "麹义", value: -1, count: 4, skill: "伏骑", description: "若本轮大宝出手后展示区没有古锭刀，自动倒置为 +2。", image: "quyi.jpg" },
-    { key: "shenganning", name: "神甘宁", value: 0, count: 4, skill: "劫营", description: "弃置任意玩家一张非本回合的展示牌。", image: "shenganning.jpg" },
-    { key: "wujing", name: "吴景", value: 1, count: 6, skill: "合击", description: "本回合每有一名其他玩家也展示吴景，此牌 +1，至多 +4。", image: "wujing.jpg" },
-    { key: "shenlusu", name: "神鲁肃", value: 2, count: 5, skill: "榻谟", description: "交换两名其他玩家各一张非本回合的展示牌；点数不变。", image: "shenlusu.jpg" },
-    { key: "wenyang", name: "文鸯", value: 3, count: 5, skill: "却敌", description: "重铸一张重复的大宝牌；没有则不重铸。", image: "wenyang.jpg" },
-    { key: "caomao", name: "曹髦", value: 4, count: 4, skill: "决进", description: "本轮大宝出手改为翻开牌堆顶的两张牌。", image: "caomao.jpg" },
-    { key: "xinghuangzhong", name: "星黄忠", value: 5, count: 4, skill: "烈弓", description: "本回合每有一名其他玩家也展示星黄忠，此牌 -2。", image: "xinghuangzhong.jpg" },
+    { key: "caochong", name: "曹冲", value: -3, count: 3, skill: "仁心", description: "若大宝牌堆有牌，本回合大宝不会击杀玩家。", image: "caochong.jpg", emblem: "skill-emblems/caochong-renxin.webp" },
+    { key: "caoang", name: "曹昂", value: -2, count: 5, skill: "慷慨", description: "重铸一张未重复的大宝牌；没有则不重铸。", image: "caoang.jpg", emblem: "skill-emblems/caoang-kangkai.webp" },
+    { key: "youpangtong", name: "友庞统", value: -1, count: 4, skill: "漫卷", description: "收回自己一张非本回合的展示牌。", image: "youpangtong.jpg", emblem: "skill-emblems/youpangtong-manjuan.webp" },
+    { key: "quyi", name: "麹义", value: -1, count: 4, skill: "伏骑", description: "若本轮大宝出手后展示区没有古锭刀，自动倒置为 +2。", image: "quyi.jpg", emblem: "skill-emblems/quyi-fuqi.webp" },
+    { key: "shenganning", name: "神甘宁", value: 0, count: 4, skill: "劫营", description: "弃置任意玩家一张非本回合的展示牌。", image: "shenganning.jpg", emblem: "skill-emblems/shenganning-jieying.webp" },
+    { key: "wujing", name: "吴景", value: 1, count: 6, skill: "合击", description: "本回合每有一名其他玩家也展示吴景，此牌 +1，至多 +4。", image: "wujing.jpg", emblem: "skill-emblems/wujing-heji.webp" },
+    { key: "shenlusu", name: "神鲁肃", value: 2, count: 5, skill: "榻谟", description: "交换两名其他玩家各一张非本回合的展示牌；点数不变。", image: "shenlusu.jpg", emblem: "skill-emblems/shenlusu-tamo.webp" },
+    { key: "wenyang", name: "文鸯", value: 3, count: 5, skill: "却敌", description: "重铸一张重复的大宝牌；没有则不重铸。", image: "wenyang.jpg", emblem: "skill-emblems/wenyang-queuedi.webp" },
+    { key: "caomao", name: "曹髦", value: 4, count: 4, skill: "决进", description: "本轮大宝出手改为翻开牌堆顶的两张牌。", image: "caomao.jpg", emblem: "skill-emblems/caomao-juejin.webp" },
+    { key: "xinghuangzhong", name: "星黄忠", value: 5, count: 4, skill: "烈弓", description: "本回合每有一名其他玩家也展示星黄忠，此牌 -2。", image: "xinghuangzhong.jpg", emblem: "skill-emblems/xinghuangzhong-liegong.webp" },
   ];
   const CARD_MAP = Object.fromEntries(CARDS.map((card) => [card.key, card]));
   const BOSS_CARDS = [

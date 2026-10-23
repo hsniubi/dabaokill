@@ -31,6 +31,7 @@
       "video/kill-browser.mp4",
       ...Array.from(new Set([...CARDS.map((card) => card.image), ...BOSS_CARDS.map((card) => card.image), ...EXTRA_PICTURES]),
         (name) => `picture/${name}`).filter((path) => path !== "picture/start.jpg"),
+      ...CARDS.map((card) => `picture/${card.emblem}`),
       ...Array.from(new Set([...CARDS.map((card) => `${card.key}.mp3`), ...EXTRA_VOICES]),
         (name) => `voice/${name}`),
     ];
