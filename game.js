@@ -60,6 +60,7 @@
       this.pendingChoice = null;
       this.activeCard = null;
       this.recastEvent = null;
+      this.cardEffectEvent = null;
       this.bossDrawCount = 1;
       this.protectedThisRound = false;
       this.result = null;
@@ -280,6 +281,14 @@
         this.say(`${choice.actorId} 号收回【${this.nameOf(found.card.key)}】。`);
       } else if (choice.kind === "discard") {
         const found = this.findDisplayed(optionId);
+        this.cardEffectEvent = {
+          kind: "discard",
+          actorId: choice.actorId,
+          targetId: found.player.id,
+          cards: found.player.display.map((card) => ({ id: card.id, key: card.key })),
+          selectedId: found.card.id,
+          selectedKey: found.card.key,
+        };
         found.player.display.splice(found.index, 1);
         this.discard.push(found.card);
         this.say(`${choice.actorId} 号弃置了 ${found.player.id} 号的【${this.nameOf(found.card.key)}】。`);
@@ -292,6 +301,18 @@
       } else if (choice.kind === "swap-second") {
         const first = this.findDisplayed(choice.firstId);
         const second = this.findDisplayed(optionId);
+        this.cardEffectEvent = {
+          kind: "swap",
+          actorId: choice.actorId,
+          firstPlayerId: first.player.id,
+          secondPlayerId: second.player.id,
+          firstCards: first.player.display.map((card) => ({ id: card.id, key: card.key })),
+          secondCards: second.player.display.map((card) => ({ id: card.id, key: card.key })),
+          firstId: first.card.id,
+          secondId: second.card.id,
+          firstKey: first.card.key,
+          secondKey: second.card.key,
+        };
         first.player.display[first.index] = second.card;
         second.player.display[second.index] = first.card;
         first.card.ownerId = second.player.id;

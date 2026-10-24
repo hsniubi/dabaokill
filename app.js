@@ -27,6 +27,9 @@
   let recastSceneData = null;
   let recastTimer = null;
   let recastSequence = 0;
+  let cardEffectSceneData = null;
+  let cardEffectTimer = null;
+  let cardEffectSequence = 0;
   let killVideoStarted = false;
   let killSoundStarted = false;
   let killFallbackTimer = null;
@@ -265,7 +268,7 @@
     const bar = app.querySelector(".boss-sticky");
     const cards = app.querySelector(".boss-set");
     if (!bar || !cards) return;
-    const sceneOpen = showPlayerFlipScene || Boolean(skillSceneEntry) || showBossFlipScene || Boolean(recastSceneData) || (game?.phase === "ended" && (showResultScene || showKillScene));
+    const sceneOpen = showPlayerFlipScene || Boolean(skillSceneEntry) || showBossFlipScene || Boolean(recastSceneData) || Boolean(cardEffectSceneData) || (game?.phase === "ended" && (showResultScene || showKillScene));
     const visible = !sceneOpen && cards.getBoundingClientRect().bottom <= 0;
     bar.classList.toggle("is-visible", visible);
     bar.setAttribute("aria-hidden", String(!visible));
@@ -429,6 +432,10 @@
     if (recastTimer !== null) clearTimeout(recastTimer);
     recastTimer = null;
     recastSequence += 1;
+    cardEffectSceneData = null;
+    if (cardEffectTimer !== null) clearTimeout(cardEffectTimer);
+    cardEffectTimer = null;
+    cardEffectSequence += 1;
     killVideoStarted = false;
     killSoundStarted = false;
     if (killStartWatchdogTimer !== null) clearTimeout(killStartWatchdogTimer);
@@ -484,15 +491,15 @@
       } else openStart();
       return;
     }
-    const sceneOpen = showPlayerFlipScene || Boolean(skillSceneEntry) || showBossFlipScene || Boolean(recastSceneData) || (game.phase === "ended" && (showResultScene || showKillScene));
+    const sceneOpen = showPlayerFlipScene || Boolean(skillSceneEntry) || showBossFlipScene || Boolean(recastSceneData) || Boolean(cardEffectSceneData) || (game.phase === "ended" && (showResultScene || showKillScene));
     document.body.classList.toggle("result-open", sceneOpen);
     app.innerHTML = `<div class="game-shell" ${sceneOpen ? 'inert aria-hidden="true"' : ""}>
       <header class="topbar"><div class="topbar-left"><div class="brand"><span class="brand-symbol">斩</span><div><strong>DABAO<span>KILL</span></strong><small>四人战大宝</small></div></div>${tabs()}</div>
       <div class="topbar-controls"><div class="turn-label"><span>第 ${String(game.round).padStart(2, "0")} 回合</span><strong>${phaseNames[game.phase]}</strong></div><button class="quiet-button sound-button" data-action="mute" aria-pressed="${sound.muted}">${sound.muted ? "开启声音" : "静音"}</button><button class="quiet-button" data-action="restart">新开一局 ↗</button></div></header>
       ${activeTab === "rules" ? rulesContent() : battleContent()}<footer>dabao<span>kill</span> · 单机版</footer>
-    </div>${recastSceneData ? recastScreen() : showPlayerFlipScene ? window.DabaoPlayerFlipScene.render(game.round, playerFlipCards, picture, sound.muted) : skillSceneEntry ? window.DabaoSkillScene.render(game.round, skillSceneEntry, CARD_MAP[skillSceneEntry.key], picture, sound.muted) : showBossFlipScene ? window.DabaoBossFlipScene.render(game.round, bossFlipCards, game.bossDeck.length, picture, sound.muted) : showKillScene ? window.DabaoKillScene.render(game.round, sound.muted) : showResultScene ? window.DabaoResultScene.render(game, picture, outcomeFor, sound.muted) : ""}${tooltipHost}`;
+    </div>${recastSceneData ? recastScreen() : cardEffectSceneData ? window.DabaoCardEffectScene.render(game.round, cardEffectSceneData, CARD_MAP, picture, sound.muted) : showPlayerFlipScene ? window.DabaoPlayerFlipScene.render(game.round, playerFlipCards, picture, sound.muted) : skillSceneEntry ? window.DabaoSkillScene.render(game.round, skillSceneEntry, CARD_MAP[skillSceneEntry.key], picture, sound.muted) : showBossFlipScene ? window.DabaoBossFlipScene.render(game.round, bossFlipCards, game.bossDeck.length, picture, sound.muted) : showKillScene ? window.DabaoKillScene.render(game.round, sound.muted) : showResultScene ? window.DabaoResultScene.render(game, picture, outcomeFor, sound.muted) : ""}${tooltipHost}`;
     if (activeTab === "battle" && !sceneOpen) updateBossStickyBar();
-    if (sceneOpen) app.querySelector(".recast-overlay, .player-flip-overlay, .skill-overlay, .boss-flip-overlay, .kill-overlay, .result-overlay")?.focus();
+    if (sceneOpen) app.querySelector(".recast-overlay, .card-effect-overlay, .player-flip-overlay, .skill-overlay, .boss-flip-overlay, .kill-overlay, .result-overlay")?.focus();
   }
 
   function completeRecastScene() {
@@ -515,6 +522,30 @@
     }, duration);
   }
 
+  function completeCardEffectScene() {
+    if (!cardEffectSceneData) return;
+    if (cardEffectTimer !== null) clearTimeout(cardEffectTimer);
+    cardEffectTimer = null;
+    cardEffectSequence += 1;
+    cardEffectSceneData = null;
+    if (game?.phase === "ended" && !showResultScene && !showKillScene) {
+      showResultScene = true;
+      sound.finish(game.result, game.mode, { humanPlayerId: game.humanPlayerId });
+    }
+    render();
+    if (game?.phase !== "ended") app.querySelector(".decision-panel button")?.focus();
+  }
+
+  function startCardEffectScene(previousEvent) {
+    if (!game?.cardEffectEvent || game.cardEffectEvent === previousEvent) return;
+    cardEffectSceneData = game.cardEffectEvent;
+    const sequence = ++cardEffectSequence;
+    const duration = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ? 1200 : 3450;
+    cardEffectTimer = setTimeout(() => {
+      if (cardEffectSceneData && cardEffectSequence === sequence) completeCardEffectScene();
+    }, duration);
+  }
+
   function completeSkillScene() {
     if (!skillSceneEntry) return;
     if (skillSceneTimer !== null) clearTimeout(skillSceneTimer);
@@ -522,8 +553,12 @@
     skillSceneSequence += 1;
     skillSceneEntry = null;
     const previousRecast = game.recastEvent;
-    if (game.resolveNext()) startRecastScene(previousRecast);
-    if (game.phase === "ended") {
+    const previousCardEffect = game.cardEffectEvent;
+    if (game.resolveNext()) {
+      startRecastScene(previousRecast);
+      startCardEffectScene(previousCardEffect);
+    }
+    if (game.phase === "ended" && !cardEffectSceneData) {
       showResultScene = true;
       sound.finish(game.result, game.mode, { humanPlayerId: game.humanPlayerId });
     }
@@ -763,6 +798,7 @@
     }
     if (showPlayerFlipScene && !["skip-player-flip", "mute", "restart"].includes(action)) return;
     if (skillSceneEntry && !["skip-skill", "mute", "restart"].includes(action)) return;
+    if (cardEffectSceneData && !["skip-card-effect", "mute", "restart"].includes(action)) return;
     if (showBossFlipScene && !["skip-flip", "mute", "restart"].includes(action)) return;
     if (recastSceneData && !["skip-recast", "mute", "restart"].includes(action)) return;
     if (action === "tab-battle" || action === "tab-rules") {
@@ -806,6 +842,10 @@
       if (recastTimer !== null) clearTimeout(recastTimer);
       recastTimer = null;
       recastSequence += 1;
+      cardEffectSceneData = null;
+      if (cardEffectTimer !== null) clearTimeout(cardEffectTimer);
+      cardEffectTimer = null;
+      cardEffectSequence += 1;
       killVideoStarted = false;
       killSoundStarted = false;
       if (killStartWatchdogTimer !== null) clearTimeout(killStartWatchdogTimer);
@@ -845,6 +885,10 @@
       completeRecastScene();
       return;
     }
+    else if (action === "skip-card-effect") {
+      completeCardEffectScene();
+      return;
+    }
     else if (action === "skip-player-flip") {
       completePlayerReveal();
       return;
@@ -868,7 +912,11 @@
     else if (action === "choose") {
       const value = button.dataset.id;
       const previousRecast = game.recastEvent;
-      if (game.choose(/^\d+$/.test(value) ? Number(value) : value)) startRecastScene(previousRecast);
+      const previousCardEffect = game.cardEffectEvent;
+      if (game.choose(/^\d+$/.test(value) ? Number(value) : value)) {
+        startRecastScene(previousRecast);
+        startCardEffectScene(previousCardEffect);
+      }
     } else if (action === "reveal") {
       startPlayerReveal();
       return;
@@ -882,7 +930,7 @@
       return;
     }
     else if (action === "next") game.startRound();
-    if (!wasEnded && game?.phase === "ended") {
+    if (!wasEnded && game?.phase === "ended" && !cardEffectSceneData) {
       showResultScene = true;
       sound.finish(game.result, game.mode, { humanPlayerId: game.humanPlayerId });
     }
@@ -915,6 +963,7 @@
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && showBeginScene) completeBeginScene();
     else if (event.key === "Escape" && recastSceneData) completeRecastScene();
+    else if (event.key === "Escape" && cardEffectSceneData) completeCardEffectScene();
     else if (event.key === "Escape" && showPlayerFlipScene) completePlayerReveal();
     else if (event.key === "Escape" && skillSceneEntry) completeSkillScene();
     else if (event.key === "Escape" && showBossFlipScene) completeBossStage();
