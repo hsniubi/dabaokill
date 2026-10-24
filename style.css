@@ -418,52 +418,52 @@ body.result-open { overflow: hidden; }
 /* The two card effects continue the skill reveal with the actual selected display cards. */
 .card-effect-overlay { position: fixed; inset: 0; z-index: 104; display: grid; grid-template-rows: auto minmax(0, 1fr) auto; overflow: hidden; isolation: isolate; color: #f8edcf; background: radial-gradient(ellipse at 50% 50%, #29493a 0, #12251e 54%, #07120f 100%); outline: none; }
 .card-effect-backdrop { position: absolute; inset: 0; z-index: -1; background: repeating-linear-gradient(90deg, transparent 0 92px, rgba(213, 181, 113, .035) 92px 93px), linear-gradient(135deg, rgba(217, 189, 124, .07), transparent 35%, transparent 65%, rgba(217, 189, 124, .06)); pointer-events: none; }
-.card-effect-heading { position: relative; z-index: 5; padding: clamp(20px, 4vh, 42px) 24px 8px; text-align: center; }
+.card-effect-heading { position: relative; z-index: 5; padding: clamp(15px, 3vh, 30px) 24px 6px; text-align: center; }
 .card-effect-heading span { color: #dbc28a; font-size: 11px; font-weight: 700; letter-spacing: .16em; }
 .card-effect-heading h2 { margin: 7px 0 0; font-size: clamp(28px, 4vw, 48px); letter-spacing: .1em; }
-.card-effect-stage { position: relative; width: min(940px, 100%); height: 100%; min-height: 0; margin: 0 auto; }
+.card-effect-stage { position: relative; width: min(1120px, 100%); height: 100%; min-height: 0; margin: 0 auto; }
 .card-effect-half { position: absolute; left: 0; right: 0; height: 50%; padding: 8px 28px; }
 .card-effect-half.is-top { top: 0; }
 .card-effect-half.is-bottom { bottom: 0; }
 .card-effect-player-row { width: 100%; height: 100%; display: flex; flex-direction: column; }
-.card-effect-seat { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 12px; border-bottom: 1px solid rgba(217, 189, 124, .35); background: linear-gradient(90deg, rgba(217, 189, 124, .12), transparent 75%); }
+.card-effect-seat { position: relative; z-index: 4; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 8px 12px; border-bottom: 1px solid rgba(217, 189, 124, .35); background: linear-gradient(90deg, rgba(217, 189, 124, .12), transparent 75%); }
 .card-effect-seat strong { color: #f3d998; font: 700 17px "Noto Serif SC", "Songti SC", serif; }
 .card-effect-seat span { color: #b2c5b5; font-size: 11px; white-space: nowrap; }
 .card-effect-rail { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; gap: 12px; }
 .card-effect-side { flex: 1; min-width: 0; display: flex; align-items: center; gap: 7px; overflow: hidden; }
 .card-effect-side.is-left { justify-content: flex-end; }
 .card-effect-side.is-right { justify-content: flex-start; }
-.card-effect-mini { width: clamp(34px, 5vw, 55px); height: clamp(48px, 7vw, 77px); flex: 0 1 auto; min-width: 25px; object-fit: cover; border: 2px solid #c3ad78; box-shadow: 0 5px 12px rgba(0,0,0,.28); }
-.card-effect-vacancy { width: clamp(88px, 11vw, 130px); aspect-ratio: 2 / 3; flex: 0 0 auto; display: grid; place-items: end center; padding: 9px; border: 1px dashed rgba(239, 211, 143, .55); background: rgba(217, 189, 124, .07); color: #cfbc8d; font-size: 11px; }
+.card-effect-mini { width: clamp(40px, 6vw, 70px); height: clamp(56px, 8.4vw, 98px); flex: 0 1 auto; min-width: 27px; object-fit: cover; border: 2px solid #c3ad78; box-shadow: 0 5px 12px rgba(0,0,0,.28); }
+.card-effect-vacancy { width: clamp(112px, min(14vw, 23vh), 185px); aspect-ratio: 2 / 3; flex: 0 0 auto; display: grid; place-items: end center; padding: 9px; border: 1px dashed rgba(239, 211, 143, .55); background: rgba(217, 189, 124, .07); color: #cfbc8d; font-size: 11px; }
 .card-effect-midline { position: absolute; top: 50%; left: 28px; right: 28px; height: 1px; background: linear-gradient(90deg, transparent, rgba(217,189,124,.75) 20%, rgba(217,189,124,.75) 80%, transparent); }
 .card-effect-midline span { position: absolute; left: 50%; top: 50%; width: 54px; height: 54px; display: grid; place-items: center; transform: translate(-50%, -50%); border: 1px solid #d9bd7c; border-radius: 50%; background: #14291f; color: #f1d594; font: 700 29px "Noto Serif SC", "Songti SC", serif; box-shadow: 0 0 28px rgba(217, 189, 124, .25); }
-.card-effect-flight { position: absolute; left: 50%; width: clamp(88px, 11vw, 130px); aspect-ratio: 2 / 3; z-index: 3; transform: translate(-50%, -50%); filter: drop-shadow(0 15px 18px rgba(0,0,0,.6)); }
+.card-effect-flight { position: absolute; left: 50%; width: clamp(112px, min(14vw, 23vh), 185px); aspect-ratio: 2 / 3; z-index: 3; transform: translate(-50%, -50%); filter: drop-shadow(0 15px 18px rgba(0,0,0,.6)); }
 .card-effect-flight img { width: 100%; height: 100%; object-fit: cover; border: 3px solid #edd297; }
 .card-effect-flight span { position: absolute; left: 50%; bottom: -22px; transform: translateX(-50%); color: #ffebba; font: 700 12px "Noto Serif SC", "Songti SC", serif; white-space: nowrap; text-shadow: 0 2px 6px #000; }
 .card-effect-flight.is-first { top: 25%; animation: card-exchange-down 3.15s .12s cubic-bezier(.45,0,.2,1) both; }
 .card-effect-flight.is-second { top: 75%; animation: card-exchange-up 3.15s .12s cubic-bezier(.45,0,.2,1) both; }
-@keyframes card-exchange-down { 0%, 14% { top: 25%; transform: translate(-50%, -50%) scale(1); } 50% { top: 50%; transform: translate(calc(-50% - 56px), -50%) rotate(-13deg) scale(1.13); } 85%, 100% { top: 75%; transform: translate(-50%, -50%) rotate(3deg) scale(1); } }
-@keyframes card-exchange-up { 0%, 14% { top: 75%; transform: translate(-50%, -50%) scale(1); } 50% { top: 50%; transform: translate(calc(-50% + 56px), -50%) rotate(13deg) scale(1.13); } 85%, 100% { top: 25%; transform: translate(-50%, -50%) rotate(-3deg) scale(1); } }
+@keyframes card-exchange-down { 0%, 14% { top: 25%; transform: translate(-50%, -50%) scale(1); } 50% { top: 50%; transform: translate(calc(-50% - clamp(75px, 11vw, 145px)), -50%) rotate(-13deg) scale(1.13); } 85%, 100% { top: 75%; transform: translate(-50%, -50%) rotate(3deg) scale(1); } }
+@keyframes card-exchange-up { 0%, 14% { top: 75%; transform: translate(-50%, -50%) scale(1); } 50% { top: 50%; transform: translate(calc(-50% + clamp(75px, 11vw, 145px)), -50%) rotate(13deg) scale(1.13); } 85%, 100% { top: 25%; transform: translate(-50%, -50%) rotate(-3deg) scale(1); } }
 .card-effect-source { position: absolute; left: 28px; right: 28px; bottom: 4%; height: 38%; }
-.card-effect-discard-card { position: absolute; z-index: 3; left: 50%; top: 74%; width: clamp(112px, 17vw, 176px); aspect-ratio: 2 / 3; transform: translate(-50%, -50%); filter: drop-shadow(0 18px 25px rgba(0,0,0,.6)); animation: card-discard-lift 3.2s ease-in-out both; }
+.card-effect-discard-card { position: absolute; z-index: 3; left: 50%; top: 74%; width: clamp(170px, 26vw, 285px); aspect-ratio: 2 / 3; transform: translate(-50%, -50%); filter: drop-shadow(0 18px 25px rgba(0,0,0,.6)); animation: card-discard-lift 3.2s ease-in-out both; }
 .card-effect-cut-half { position: absolute; inset: 0; background: #e5d5ad; }
 .card-effect-cut-half img { width: 100%; height: 100%; object-fit: cover; border: 4px solid #e9d299; }
 .card-effect-cut-half.is-a { clip-path: polygon(0 0, 100% 0, 0 100%); animation: card-discard-left 3.2s ease-in both; }
 .card-effect-cut-half.is-b { clip-path: polygon(100% 0, 100% 100%, 0 100%); animation: card-discard-right 3.2s ease-in both; }
-.card-effect-slash { position: absolute; z-index: 5; left: 50%; top: 44%; width: clamp(200px, 27vw, 310px); height: 4px; transform: translate(-50%, -50%) rotate(-56deg) scaleX(0); background: linear-gradient(90deg, transparent, #fff7d8 18%, #fff 52%, #f0c667 82%, transparent); box-shadow: 0 0 16px #fff0ae, 0 0 42px #d9a94b; animation: card-discard-slash 3.2s both; pointer-events: none; }
-.card-effect-impact { position: absolute; z-index: 4; left: 50%; top: 44%; width: 250px; aspect-ratio: 1; transform: translate(-50%, -50%) scale(.1); border-radius: 50%; background: radial-gradient(circle, rgba(255,249,213,.7), rgba(228,188,91,.23) 35%, transparent 72%); animation: card-discard-impact 3.2s both; pointer-events: none; }
+.card-effect-slash { position: absolute; z-index: 5; left: 50%; top: 44%; width: clamp(290px, 38vw, 470px); height: 4px; transform: translate(-50%, -50%) rotate(-56deg) scaleX(0); background: linear-gradient(90deg, transparent, #fff7d8 18%, #fff 52%, #f0c667 82%, transparent); box-shadow: 0 0 16px #fff0ae, 0 0 42px #d9a94b; animation: card-discard-slash 3.2s both; pointer-events: none; }
+.card-effect-impact { position: absolute; z-index: 4; left: 50%; top: 44%; width: 350px; aspect-ratio: 1; transform: translate(-50%, -50%) scale(.1); border-radius: 50%; background: radial-gradient(circle, rgba(255,249,213,.7), rgba(228,188,91,.23) 35%, transparent 72%); animation: card-discard-impact 3.2s both; pointer-events: none; }
 @keyframes card-discard-lift { 0%, 12% { top: 74%; transform: translate(-50%, -50%) scale(.7); } 39%, 100% { top: 44%; transform: translate(-50%, -50%) scale(1); } }
 @keyframes card-discard-left { 0%, 54% { transform: translate(0, 0) rotate(0); opacity: 1; } 77% { transform: translate(-48px, 24px) rotate(-15deg); opacity: 1; } 100% { transform: translate(-95px, 120px) rotate(-34deg); opacity: 0; } }
 @keyframes card-discard-right { 0%, 54% { transform: translate(0, 0) rotate(0); opacity: 1; } 77% { transform: translate(48px, -24px) rotate(15deg); opacity: 1; } 100% { transform: translate(95px, 100px) rotate(34deg); opacity: 0; } }
 @keyframes card-discard-slash { 0%, 46% { opacity: 0; transform: translate(-50%, -50%) rotate(-56deg) scaleX(0); } 52% { opacity: 1; transform: translate(-50%, -50%) rotate(-56deg) scaleX(1); } 62%, 100% { opacity: 0; transform: translate(-50%, -50%) rotate(-56deg) scaleX(1.12); } }
 @keyframes card-discard-impact { 0%, 50% { opacity: 0; transform: translate(-50%, -50%) scale(.1); } 56% { opacity: .7; } 68%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.8); } }
-.card-effect-footer { position: relative; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 8px clamp(20px, 5vw, 70px) clamp(19px, 3vh, 34px); }
+.card-effect-footer { position: relative; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 6px clamp(20px, 5vw, 70px) clamp(14px, 2vh, 24px); }
 .card-effect-footer p { margin: 0; color: #d8c593; font-size: 12px; line-height: 1.5; }
 .card-effect-footer > div { display: flex; gap: 9px; flex: 0 0 auto; }
 .card-effect-footer button { padding: 9px 12px; border: 1px solid rgba(217, 189, 124, .6); background: rgba(11, 25, 19, .84); color: #f6e2b0; font-size: 12px; }
 .card-effect-footer button:hover { border-color: #f6de9d; background: rgba(82, 69, 37, .85); }
 @media (max-width: 600px) {
-  .card-effect-heading { padding: 20px 12px 5px; }
+  .card-effect-heading { padding: 14px 12px 4px; }
   .card-effect-heading span { font-size: 9px; letter-spacing: .08em; }
   .card-effect-heading h2 { font-size: 28px; }
   .card-effect-half { padding: 5px 12px; }
@@ -472,14 +472,15 @@ body.result-open { overflow: hidden; }
   .card-effect-seat span { font-size: 9px; }
   .card-effect-rail { gap: 6px; }
   .card-effect-side { gap: 3px; }
-  .card-effect-mini { width: 31px; height: 43px; min-width: 17px; border-width: 1px; }
-  .card-effect-vacancy, .card-effect-flight { width: clamp(72px, 22vw, 95px); }
+  .card-effect-mini { width: 39px; height: 55px; min-width: 22px; border-width: 1px; }
+  .card-effect-vacancy, .card-effect-flight { width: clamp(108px, 35vw, 150px); }
   .card-effect-vacancy { font-size: 9px; }
   .card-effect-midline { left: 12px; right: 12px; }
   .card-effect-midline span { width: 43px; height: 43px; font-size: 22px; }
   .card-effect-source { left: 12px; right: 12px; }
-  .card-effect-discard-card { width: clamp(105px, 31vw, 145px); }
-  .card-effect-footer { display: block; padding: 6px 14px 19px; text-align: center; }
+  .card-effect-discard-card { width: clamp(155px, 47vw, 210px); }
+  .card-effect-impact { width: 270px; }
+  .card-effect-footer { display: block; padding: 5px 14px 12px; text-align: center; }
   .card-effect-footer p { font-size: 10px; }
   .card-effect-footer > div { justify-content: center; margin-top: 9px; }
 }
@@ -487,8 +488,8 @@ body.result-open { overflow: hidden; }
   .card-effect-heading { padding-top: 8px; }
   .card-effect-heading h2 { margin-top: 2px; font-size: 24px; }
   .card-effect-seat { padding-block: 3px; }
-  .card-effect-vacancy, .card-effect-flight { width: min(19vh, 92px); }
-  .card-effect-discard-card { width: min(26vh, 130px); }
+  .card-effect-vacancy, .card-effect-flight { width: min(22vh, 112px); }
+  .card-effect-discard-card { width: min(32vh, 170px); }
   .card-effect-footer { padding-bottom: 7px; }
 }
 @media (max-width: 600px) {
