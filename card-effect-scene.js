@@ -44,6 +44,7 @@
       </div>
       <div class="card-effect-slash" aria-hidden="true"></div>
       <div class="card-effect-impact" aria-hidden="true"></div>
+      <div class="card-effect-shockwave" aria-hidden="true"></div>
     </div>`;
   }
 

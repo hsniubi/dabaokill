@@ -7,7 +7,7 @@
   ];
   // Background music starts from the user's click; preloading it again competes with playback.
   const EXTRA_VOICES = [
-    "dabao1.mp3", "dabaokill.mp3", "victory.mp3", "fail.mp3",
+    "dabao1.mp3", "dabaokill.mp3", "victory.mp3", "fail.mp3", "slash.wav",
   ];
   const OPTIONAL_ASSETS = [
     "video/kill-browser.mp4",

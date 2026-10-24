@@ -36,6 +36,11 @@
         if (this.bossCue.error) this.completeBossCue();
       });
 
+      this.slashAsset = assetUrl("voice/slash.wav");
+      this.slash = new AudioType(this.slashAsset);
+      this.slash.volume = 0.95;
+      this.slash.preload = "auto";
+
       this.voice = new AudioType();
       this.voice.volume = 0.95;
       this.voice.preload = "auto";
@@ -93,6 +98,11 @@
         this.bossCueAsset = bossCueAsset;
         this.bossCue.src = bossCueAsset;
       }
+      const slashAsset = assetUrl("voice/slash.wav");
+      if (slashAsset !== this.slashAsset) {
+        this.slashAsset = slashAsset;
+        this.slash.src = slashAsset;
+      }
     }
 
     play(audio, onFailure) {
@@ -118,6 +128,7 @@
       this.bgmPlayAttempt += 1;
       this.bgm.pause();
       this.bossCue.pause();
+      this.slash.pause();
       this.bossCuePlaying = false;
       this.bossCueDone = null;
       this.bossCueId += 1;
@@ -130,6 +141,13 @@
 
     playCard(key) {
       if (key && this.inGame) this.interruptWith([`${key}.mp3`]);
+    }
+
+    playSlash() {
+      if (!this.inGame || this.muted) return;
+      this.slash.pause();
+      this.slash.currentTime = 0;
+      this.play(this.slash);
     }
 
     playBossTurn() {
@@ -162,6 +180,7 @@
       this.inGame = false;
       this.bgm.pause();
       this.bossCue.pause();
+      this.slash.pause();
       this.bossCuePlaying = false;
       this.bossCueDone = null;
       this.bossCueId += 1;
@@ -199,6 +218,7 @@
       this.inGame = false;
       this.bgm.pause();
       this.bossCue.pause();
+      this.slash.pause();
       this.bossCuePlaying = false;
       this.bossCueDone = null;
       this.bossCueId += 1;
@@ -221,6 +241,7 @@
         this.bgmPlayAttempt += 1;
         this.bgm.pause();
         this.bossCue.pause();
+        this.slash.pause();
         this.completeBossCue();
         this.voice.pause();
         this.queue = [];

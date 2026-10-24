@@ -29,6 +29,7 @@
   let recastSequence = 0;
   let cardEffectSceneData = null;
   let cardEffectTimer = null;
+  let cardEffectSoundTimer = null;
   let cardEffectSequence = 0;
   let killVideoStarted = false;
   let killSoundStarted = false;
@@ -435,6 +436,8 @@
     cardEffectSceneData = null;
     if (cardEffectTimer !== null) clearTimeout(cardEffectTimer);
     cardEffectTimer = null;
+    if (cardEffectSoundTimer !== null) clearTimeout(cardEffectSoundTimer);
+    cardEffectSoundTimer = null;
     cardEffectSequence += 1;
     killVideoStarted = false;
     killSoundStarted = false;
@@ -526,6 +529,8 @@
     if (!cardEffectSceneData) return;
     if (cardEffectTimer !== null) clearTimeout(cardEffectTimer);
     cardEffectTimer = null;
+    if (cardEffectSoundTimer !== null) clearTimeout(cardEffectSoundTimer);
+    cardEffectSoundTimer = null;
     cardEffectSequence += 1;
     cardEffectSceneData = null;
     if (game?.phase === "ended" && !showResultScene && !showKillScene) {
@@ -540,7 +545,15 @@
     if (!game?.cardEffectEvent || game.cardEffectEvent === previousEvent) return;
     cardEffectSceneData = game.cardEffectEvent;
     const sequence = ++cardEffectSequence;
-    const duration = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches ? 1200 : 3450;
+    const reducedMotion = window.matchMedia?.("(prefers-reduced-motion: reduce)")?.matches;
+    const duration = reducedMotion ? 1200 : 3450;
+    if (cardEffectSceneData.kind === "discard") {
+      // The sound's impact is 390ms in, aligned to the card split at 53% of 3.2s.
+      cardEffectSoundTimer = setTimeout(() => {
+        cardEffectSoundTimer = null;
+        if (cardEffectSceneData?.kind === "discard" && cardEffectSequence === sequence) sound.playSlash();
+      }, reducedMotion ? 50 : 1300);
+    }
     cardEffectTimer = setTimeout(() => {
       if (cardEffectSceneData && cardEffectSequence === sequence) completeCardEffectScene();
     }, duration);
@@ -845,6 +858,8 @@
       cardEffectSceneData = null;
       if (cardEffectTimer !== null) clearTimeout(cardEffectTimer);
       cardEffectTimer = null;
+      if (cardEffectSoundTimer !== null) clearTimeout(cardEffectSoundTimer);
+      cardEffectSoundTimer = null;
       cardEffectSequence += 1;
       killVideoStarted = false;
       killSoundStarted = false;

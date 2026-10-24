@@ -445,18 +445,23 @@ body.result-open { overflow: hidden; }
 @keyframes card-exchange-down { 0%, 14% { top: 25%; transform: translate(-50%, -50%) scale(1); } 50% { top: 50%; transform: translate(calc(-50% - clamp(75px, 11vw, 145px)), -50%) rotate(-13deg) scale(1.13); } 85%, 100% { top: 75%; transform: translate(-50%, -50%) rotate(3deg) scale(1); } }
 @keyframes card-exchange-up { 0%, 14% { top: 75%; transform: translate(-50%, -50%) scale(1); } 50% { top: 50%; transform: translate(calc(-50% + clamp(75px, 11vw, 145px)), -50%) rotate(13deg) scale(1.13); } 85%, 100% { top: 25%; transform: translate(-50%, -50%) rotate(-3deg) scale(1); } }
 .card-effect-source { position: absolute; left: 28px; right: 28px; bottom: 4%; height: 38%; }
+.card-effect-stage.is-discard { animation: card-discard-shock 3.2s both; }
 .card-effect-discard-card { position: absolute; z-index: 3; left: 50%; top: 74%; width: clamp(170px, 26vw, 285px); aspect-ratio: 2 / 3; transform: translate(-50%, -50%); filter: drop-shadow(0 18px 25px rgba(0,0,0,.6)); animation: card-discard-lift 3.2s ease-in-out both; }
 .card-effect-cut-half { position: absolute; inset: 0; background: #e5d5ad; }
 .card-effect-cut-half img { width: 100%; height: 100%; object-fit: cover; border: 4px solid #e9d299; }
 .card-effect-cut-half.is-a { clip-path: polygon(0 0, 100% 0, 0 100%); animation: card-discard-left 3.2s ease-in both; }
 .card-effect-cut-half.is-b { clip-path: polygon(100% 0, 100% 100%, 0 100%); animation: card-discard-right 3.2s ease-in both; }
-.card-effect-slash { position: absolute; z-index: 5; left: 50%; top: 44%; width: clamp(290px, 38vw, 470px); height: 4px; transform: translate(-50%, -50%) rotate(-56deg) scaleX(0); background: linear-gradient(90deg, transparent, #fff7d8 18%, #fff 52%, #f0c667 82%, transparent); box-shadow: 0 0 16px #fff0ae, 0 0 42px #d9a94b; animation: card-discard-slash 3.2s both; pointer-events: none; }
-.card-effect-impact { position: absolute; z-index: 4; left: 50%; top: 44%; width: 350px; aspect-ratio: 1; transform: translate(-50%, -50%) scale(.1); border-radius: 50%; background: radial-gradient(circle, rgba(255,249,213,.7), rgba(228,188,91,.23) 35%, transparent 72%); animation: card-discard-impact 3.2s both; pointer-events: none; }
-@keyframes card-discard-lift { 0%, 12% { top: 74%; transform: translate(-50%, -50%) scale(.7); } 39%, 100% { top: 44%; transform: translate(-50%, -50%) scale(1); } }
-@keyframes card-discard-left { 0%, 54% { transform: translate(0, 0) rotate(0); opacity: 1; } 77% { transform: translate(-48px, 24px) rotate(-15deg); opacity: 1; } 100% { transform: translate(-95px, 120px) rotate(-34deg); opacity: 0; } }
-@keyframes card-discard-right { 0%, 54% { transform: translate(0, 0) rotate(0); opacity: 1; } 77% { transform: translate(48px, -24px) rotate(15deg); opacity: 1; } 100% { transform: translate(95px, 100px) rotate(34deg); opacity: 0; } }
-@keyframes card-discard-slash { 0%, 46% { opacity: 0; transform: translate(-50%, -50%) rotate(-56deg) scaleX(0); } 52% { opacity: 1; transform: translate(-50%, -50%) rotate(-56deg) scaleX(1); } 62%, 100% { opacity: 0; transform: translate(-50%, -50%) rotate(-56deg) scaleX(1.12); } }
-@keyframes card-discard-impact { 0%, 50% { opacity: 0; transform: translate(-50%, -50%) scale(.1); } 56% { opacity: .7; } 68%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.8); } }
+.card-effect-slash { position: absolute; z-index: 5; left: 50%; top: 44%; width: clamp(345px, 47vw, 590px); height: 8px; transform: translate(-50%, -50%) rotate(-56deg) scaleX(0); background: linear-gradient(90deg, transparent, #f6d782 12%, #fff 38%, #fff 68%, #eebc50 88%, transparent); box-shadow: 0 0 12px #fff, 0 0 34px #fff0ae, 0 0 75px #d99235; animation: card-discard-slash 3.2s both; pointer-events: none; }
+.card-effect-slash::before { content: ""; position: absolute; inset: -17px -8px; background: linear-gradient(90deg, transparent, rgba(255,243,186,.22) 18%, rgba(255,249,218,.7) 50%, rgba(255,224,132,.2) 82%, transparent); filter: blur(11px); }
+.card-effect-impact { position: absolute; z-index: 4; left: 50%; top: 44%; width: 440px; aspect-ratio: 1; transform: translate(-50%, -50%) scale(.1); border-radius: 50%; background: radial-gradient(circle, rgba(255,255,246,.9), rgba(255,228,138,.55) 19%, rgba(228,147,60,.19) 48%, transparent 72%); animation: card-discard-impact 3.2s both; pointer-events: none; }
+.card-effect-shockwave { position: absolute; z-index: 4; left: 50%; top: 44%; width: min(55vw, 510px); aspect-ratio: 1; border: 5px solid rgba(255,241,173,.85); border-radius: 50%; box-shadow: 0 0 28px rgba(255,226,138,.8), inset 0 0 25px rgba(255,226,138,.55); transform: translate(-50%, -50%) scale(.1); animation: card-discard-wave 3.2s both; pointer-events: none; }
+@keyframes card-discard-lift { 0%, 12% { top: 74%; transform: translate(-50%, -50%) scale(.7); } 39% { top: 44%; transform: translate(-50%, -50%) scale(1); } 47% { top: 44%; transform: translate(-50%, -50%) rotate(-4deg) scale(1.09); } 51% { top: 44%; transform: translate(-50%, -50%) rotate(2deg) scale(.97); } 54% { top: 44%; transform: translate(-50%, -50%) scale(1.1); } 65%, 100% { top: 44%; transform: translate(-50%, -50%) scale(1); } }
+@keyframes card-discard-left { 0%, 53% { transform: translate(0, 0) rotate(0); opacity: 1; } 62% { transform: translate(-60px, 27px) rotate(-20deg); opacity: 1; } 80% { transform: translate(-135px, 55px) rotate(-38deg); opacity: .9; } 100% { transform: translate(-210px, 150px) rotate(-70deg); opacity: 0; } }
+@keyframes card-discard-right { 0%, 53% { transform: translate(0, 0) rotate(0); opacity: 1; } 62% { transform: translate(62px, -28px) rotate(21deg); opacity: 1; } 80% { transform: translate(140px, 45px) rotate(42deg); opacity: .9; } 100% { transform: translate(215px, 150px) rotate(72deg); opacity: 0; } }
+@keyframes card-discard-slash { 0%, 44% { opacity: 0; transform: translate(-50%, -50%) rotate(-56deg) scaleX(0); } 52% { opacity: 1; transform: translate(-50%, -50%) rotate(-56deg) scaleX(1.1); } 58% { opacity: .95; transform: translate(-50%, -50%) rotate(-56deg) scaleX(1.2); } 66%, 100% { opacity: 0; transform: translate(-50%, -50%) rotate(-56deg) scaleX(1.28); } }
+@keyframes card-discard-impact { 0%, 52% { opacity: 0; transform: translate(-50%, -50%) scale(.1); } 54% { opacity: .9; transform: translate(-50%, -50%) scale(.65); } 65%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.65); } }
+@keyframes card-discard-wave { 0%, 52% { opacity: 0; transform: translate(-50%, -50%) scale(.1); } 54% { opacity: 1; transform: translate(-50%, -50%) scale(.25); } 67%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(1.75); } }
+@keyframes card-discard-shock { 0%, 52% { transform: translate(0, 0); } 54% { transform: translate(-8px, 4px); } 56% { transform: translate(7px, -3px); } 59% { transform: translate(-4px, 2px); } 62%, 100% { transform: translate(0, 0); } }
 .card-effect-footer { position: relative; z-index: 5; display: flex; justify-content: space-between; align-items: center; gap: 15px; padding: 6px clamp(20px, 5vw, 70px) clamp(14px, 2vh, 24px); }
 .card-effect-footer p { margin: 0; color: #d8c593; font-size: 12px; line-height: 1.5; }
 .card-effect-footer > div { display: flex; gap: 9px; flex: 0 0 auto; }
@@ -479,7 +484,8 @@ body.result-open { overflow: hidden; }
   .card-effect-midline span { width: 43px; height: 43px; font-size: 22px; }
   .card-effect-source { left: 12px; right: 12px; }
   .card-effect-discard-card { width: clamp(155px, 47vw, 210px); }
-  .card-effect-impact { width: 270px; }
+  .card-effect-impact { width: 300px; }
+  .card-effect-shockwave { width: min(84vw, 340px); }
   .card-effect-footer { display: block; padding: 5px 14px 12px; text-align: center; }
   .card-effect-footer p { font-size: 10px; }
   .card-effect-footer > div { justify-content: center; margin-top: 9px; }
@@ -501,14 +507,14 @@ body.result-open { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .skill-backdrop, .skill-ribbon, .skill-glow, .skill-art, .skill-art-foreground, .skill-meta { animation: none !important; opacity: 1; }
   .skill-ribbon { transform: translateY(-50%) scaleX(1); }
-  .card-effect-flight, .card-effect-discard-card, .card-effect-cut-half, .card-effect-slash, .card-effect-impact { animation: none !important; }
+  .card-effect-flight, .card-effect-stage.is-discard, .card-effect-discard-card, .card-effect-cut-half, .card-effect-slash, .card-effect-impact, .card-effect-shockwave { animation: none !important; }
   .card-effect-flight.is-first { top: 75%; }
   .card-effect-flight.is-second { top: 25%; }
   .card-effect-discard-card { top: 44%; }
   .card-effect-cut-half.is-a { transform: translate(-25px, 12px) rotate(-8deg); }
   .card-effect-cut-half.is-b { transform: translate(25px, -12px) rotate(8deg); }
   .card-effect-slash { transform: translate(-50%, -50%) rotate(-56deg); }
-  .card-effect-impact { display: none; }
+  .card-effect-impact, .card-effect-shockwave { display: none; }
 }
 
 /* The supplied kill video occupies the entire ending stage. */
