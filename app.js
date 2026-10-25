@@ -356,7 +356,7 @@
         ? chooser.hand.find((card) => card.id === pendingSelection.cardId)
         : null;
       return `<div class="decision-content"><div class="decision-title"><div><div class="section-kicker">战备 · 盖放一张</div><h2>请 ${chooser.id} 号玩家选牌</h2></div><span class="decision-tip">翻开展示牌前可换牌</span></div>
-        <p>${chosen ? `已预选【${CARD_MAP[chosen.key].name}】。点击另一张手牌可更换，或再次点击这张取消预选。` : "从上方常驻手牌区点击一张手牌，选好后再确认盖放。"}</p>
+        <p>${chosen ? `已预选【${CARD_MAP[chosen.key].name}】。点击另一张手牌可更换，或再次点击这张取消预选。` : "从手牌区点击一张手牌，选好后再确认盖放。"}</p>
         ${chosen ? '<button type="button" class="primary-button" data-action="confirm-select">确认盖放 <span>↗</span></button>' : ""}</div>`;
     }
     if (game.phase === "choice") {
@@ -367,7 +367,7 @@
           return `<button class="choice-option" data-action="choose" data-id="${option.id}" ${playerCard ? `data-card-key="${playerCard.key}"` : ""}>${img(option.image, "choice-image", option.label)}<span>${option.label}</span><b>选择 ↗</b></button>`;
         }).join("")}</div></div>`;
     }
-    if (game.phase === "ready-reveal") return buttonPrompt("展示阶段", "四名玩家已盖放", "翻牌前可在上方手牌区换牌。确认无误后同时翻开四张牌，按牌面点数和玩家编号依次结算。", "翻开展示牌", "reveal");
+    if (game.phase === "ready-reveal") return buttonPrompt("展示阶段", "四名玩家已盖放", "翻牌前可在手牌区换牌。确认无误后同时翻开四张牌，按牌面点数和玩家编号依次结算。", "翻开展示牌", "reveal");
     if (game.phase === "resolve") {
       const next = game.resolutionQueue[0];
       return buttonPrompt("展示阶段", `下一张 · ${next.ownerId} 号【${CARD_MAP[next.key].name}】`, `牌面 ${signed(CARD_MAP[next.key].value)} 勾玉 · ${CARD_MAP[next.key].skill}`, "结算这张牌", "resolve");
@@ -395,8 +395,10 @@
       ${bossStickyBar()}
       <div class="section-heading players-heading"><div><span class="section-kicker">PLAYER FIELD</span><h2>四方战阵</h2></div><span class="section-aside">率先达到 11 勾玉，即可击败大宝</span></div>
       <section class="players-grid" aria-label="玩家区域">${game.players.map(playerPanel).join("")}</section>
-      ${handDock()}
-      <section class="decision-panel" aria-label="当前操作">${interaction()}</section>
+      <div class="hand-decision-row ${game.mode === "solo" ? "is-solo" : "is-local"}">
+        ${handDock()}
+        <section class="decision-panel" aria-label="当前操作">${interaction()}</section>
+      </div>
       <div class="lower-grid">${rulesPanel()}<section class="battle-log"><div class="log-heading"><strong>战报</strong><span>最新记录在上</span></div><ol>${game.log.slice(0, 7).map((item) => `<li>${item}</li>`).join("")}</ol></section></div>
       </main>`;
   }
