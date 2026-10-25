@@ -3,12 +3,14 @@
 
   const ART = { victory: "victory.png", fail: "fail.png", tie: "tie.png" };
   const LABEL = { victory: "胜利", fail: "失败", tie: "平局" };
+  const signed = (value) => value > 0 ? `+${value}` : String(value);
 
   function viewModel(game, outcomeFor) {
     const result = game.result;
     const seats = game.players.map((player) => ({
       id: player.id,
       score: game.score(player),
+      roundValue: game.roundScore(player),
       outcome: outcomeFor(result, player.id),
     }));
     const main = result.kind === "draw" ? "tie" : game.mode === "solo" ? seats.find((seat) => seat.id === game.humanPlayerId).outcome : "victory";
@@ -38,7 +40,7 @@
           <p class="scene-message">${view.message}</p>
           <div class="scene-seats" aria-label="四名玩家的结算结果">${view.seats.map((seat, index) => `<div class="scene-seat scene-seat-${seat.outcome}" style="--seat-order:${index}">
             <span class="scene-seat-number">${String(seat.id).padStart(2, "0")}</span>
-            <div class="scene-seat-body"><strong>${seat.id} 号玩家${game.mode === "solo" && seat.id === game.humanPlayerId ? " · 你" : ""}</strong><span>${seat.score} 勾玉</span></div>
+            <div class="scene-seat-body"><strong>${seat.id} 号玩家${game.mode === "solo" && seat.id === game.humanPlayerId ? " · 你" : ""}</strong><span>${seat.roundValue === null ? "" : `<em class="scene-seat-round-score">(${signed(seat.roundValue)})</em>`}${seat.score} 勾玉</span></div>
             <img src="${picture(ART[seat.outcome])}" alt="${LABEL[seat.outcome]}">
           </div>`).join("")}</div>
           <div class="scene-actions"><button class="scene-secondary" data-action="close-result">查看战场</button><button class="scene-primary" data-action="restart">再开一局 <span>↗</span></button></div>

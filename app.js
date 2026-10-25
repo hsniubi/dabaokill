@@ -303,10 +303,11 @@
 
   function playerPanel(player) {
     const current = game.phase === "select" && game.currentChooser()?.id === player.id;
+    const roundValue = game.phase === "ended" ? game.roundScore(player) : game.pendingScore(player);
     return `<article class="player-panel ${current ? "is-active" : ""}">
       <div class="player-top"><span class="seat-number">${String(player.id).padStart(2, "0")}</span>
         <div class="player-identity"><strong>${player.id} 号玩家</strong><span>${player.isAI ? "电脑" : game.mode === "solo" ? "你" : "手动操控"}</span></div>
-        <div class="score-box">${img("gouyu.jpg", "gouyu", "勾玉")}<strong>${game.score(player)}</strong></div>
+        <div class="score-box">${roundValue === null ? "" : `<span class="score-pending">(${signed(roundValue)})</span>`}${img("gouyu.jpg", "gouyu", "勾玉")}<strong>${game.score(player)}</strong></div>
       </div>
       <div class="display-heading"><span>展示牌</span><span>${player.display.length} 张</span></div>
       <div class="display-track">${displayCards(player)}</div>

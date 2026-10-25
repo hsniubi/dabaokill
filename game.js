@@ -72,6 +72,20 @@
     player(id) { return this.players.find((player) => player.id === id); }
     score(player) { return player.display.reduce((sum, card) => sum + (card.value ?? 0), 0); }
     scoreOf(id) { return this.score(this.player(id)); }
+    cardValue(entry) {
+      const same = this.revealedThisRound.filter((card) => card.ownerId !== entry.ownerId && card.key === entry.key).length;
+      if (entry.key === "wujing") return Math.min(4, CARD_MAP[entry.key].value + same);
+      if (entry.key === "xinghuangzhong") return CARD_MAP[entry.key].value - 2 * same;
+      return CARD_MAP[entry.key].value;
+    }
+    pendingScore(player) {
+      const card = player.display.find((entry) => entry.round === this.round && (entry.value === null || this.activeCard?.id === entry.id));
+      return card ? (card.value ?? this.cardValue(card)) : null;
+    }
+    roundScore(player) {
+      const card = player.display.find((entry) => entry.round === this.round);
+      return card ? (card.value ?? this.cardValue(card)) : null;
+    }
     say(message) { this.log.unshift(message); }
     nameOf(key) { return CARD_MAP[key].name; }
     bossName(key) { return BOSS_MAP[key].name; }
@@ -222,10 +236,7 @@
       const entry = this.resolutionQueue.shift();
       this.activeCard = entry;
       const actor = this.player(entry.ownerId);
-      let value = CARD_MAP[entry.key].value;
-      const same = this.revealedThisRound.filter((card) => card.ownerId !== actor.id && card.key === entry.key).length;
-      if (entry.key === "wujing") value = Math.min(4, value + same);
-      if (entry.key === "xinghuangzhong") value -= 2 * same;
+      const value = this.cardValue(entry);
       entry.value = value;
       this.say(`${actor.id} 号玩家的【${this.nameOf(entry.key)}】结算，计 ${this.signed(value)} 勾玉。`);
 
