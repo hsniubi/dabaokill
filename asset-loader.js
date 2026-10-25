@@ -10,8 +10,8 @@
     "dabao1.mp3", "dabaokill.mp3", "victory.mp3", "fail.mp3", "slash.wav",
   ];
   const OPTIONAL_ASSETS = [
+    "picture/victory.png", "picture/fail.png", "picture/tie.png", "picture/kill.jpg",
     "video/kill-browser.mp4",
-    "picture/kill.jpg", "picture/victory.png", "picture/fail.png", "picture/tie.png",
     "voice/dabaokill.mp3", "voice/victory.mp3", "voice/fail.mp3",
   ];
   const optionalPaths = new Set(OPTIONAL_ASSETS);

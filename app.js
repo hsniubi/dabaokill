@@ -502,6 +502,21 @@
       ${activeTab === "rules" ? rulesContent() : battleContent()}<footer>dabao<span>kill</span> · 单机版</footer>
     </div>${recastSceneData ? recastScreen() : cardEffectSceneData ? window.DabaoCardEffectScene.render(game.round, cardEffectSceneData, CARD_MAP, picture, sound.muted) : showPlayerFlipScene ? window.DabaoPlayerFlipScene.render(game.round, playerFlipCards, picture, sound.muted) : skillSceneEntry ? window.DabaoSkillScene.render(game.round, skillSceneEntry, CARD_MAP[skillSceneEntry.key], picture, sound.muted) : showBossFlipScene ? window.DabaoBossFlipScene.render(game.round, bossFlipCards, game.bossDeck.length, picture, sound.muted) : showKillScene ? window.DabaoKillScene.render(game.round, sound.muted) : showResultScene ? window.DabaoResultScene.render(game, picture, outcomeFor, sound.muted) : ""}${tooltipHost}`;
     if (activeTab === "battle" && !sceneOpen) updateBossStickyBar();
+    if (showResultScene && game.phase === "ended") {
+      const overlay = app.querySelector(".result-overlay");
+      const art = overlay?.querySelector?.(".scene-emblem-art");
+      if (art) {
+        const reveal = () => {
+          if (overlay.isConnected) overlay.classList.add("is-art-ready");
+        };
+        if (typeof art.decode === "function") art.decode().then(reveal, reveal);
+        else if (art.complete) reveal();
+        else {
+          art.addEventListener("load", reveal, { once: true });
+          art.addEventListener("error", reveal, { once: true });
+        }
+      }
+    }
     if (sceneOpen) app.querySelector(".recast-overlay, .card-effect-overlay, .player-flip-overlay, .skill-overlay, .boss-flip-overlay, .kill-overlay, .result-overlay")?.focus();
   }
 

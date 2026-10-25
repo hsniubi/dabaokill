@@ -33,7 +33,7 @@
         <header class="scene-header"><span>DABAO<span>KILL</span> · 对局结算</span><button class="scene-sound" data-action="mute" aria-pressed="${muted}">${muted ? "开启声音" : "静音"}</button></header>
         <div class="scene-main">
           <div class="scene-eyebrow">第 ${String(game.round).padStart(2, "0")} 回合 · ${view.reason}</div>
-          <div class="scene-emblem"><span class="scene-halo" aria-hidden="true"></span><img class="scene-emblem-art" src="${picture(ART[view.main])}" alt="${LABEL[view.main]}"><span class="scene-shine" aria-hidden="true"></span></div>
+          <div class="scene-emblem"><span class="scene-halo" aria-hidden="true"></span><img class="scene-emblem-art" src="${picture(ART[view.main])}" alt="${LABEL[view.main]}" decoding="async" loading="eager"><span class="scene-shine" aria-hidden="true"></span></div>
           <h2 id="result-scene-title">${view.title}</h2>
           <p class="scene-message">${view.message}</p>
           <div class="scene-seats" aria-label="四名玩家的结算结果">${view.seats.map((seat, index) => `<div class="scene-seat scene-seat-${seat.outcome}" style="--seat-order:${index}">
