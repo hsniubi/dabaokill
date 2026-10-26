@@ -79,11 +79,8 @@
       return CARD_MAP[entry.key].value;
     }
     pendingScore(player) {
-      const card = player.display.find((entry) => entry.round === this.round && (entry.value === null || this.activeCard?.id === entry.id));
-      return card ? (card.value ?? this.cardValue(card)) : null;
-    }
-    roundScore(player) {
-      const card = player.display.find((entry) => entry.round === this.round);
+      const card = player.display.find((entry) => entry.round === this.round
+        && (entry.value === null || (this.phase === "choice" && this.activeCard?.id === entry.id)));
       return card ? (card.value ?? this.cardValue(card)) : null;
     }
     say(message) { this.log.unshift(message); }

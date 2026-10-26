@@ -299,7 +299,7 @@ body.result-open { overflow: hidden; }
 .scene-seat-body strong, .scene-seat-body span { display: block; white-space: nowrap; }
 .scene-seat-body strong { font-size: 12px; }
 .scene-seat-body span { margin-top: 6px; color: rgba(255,249,233,.55); font: 13px Georgia, serif; }
-.scene-seat-round-score { margin-right: 6px; color: var(--seat-accent); font-style: normal; font-weight: 700; }
+.scene-seat-pending-score { margin-right: 6px; color: var(--seat-accent); font-style: normal; font-weight: 700; }
 .scene-seat img { width: 66px; height: 43px; flex: 0 0 66px; object-fit: contain; filter: drop-shadow(0 0 9px var(--seat-accent)); }
 .scene-actions { display: flex; justify-content: center; gap: 11px; margin-top: 28px; animation: scene-rise .3s .4s both; }
 .scene-actions button { min-width: 155px; padding: 13px 22px; font-size: 13px; font-weight: 700; }
