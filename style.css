@@ -281,11 +281,11 @@ body.result-open { overflow: hidden; }
 .scene-halo::after { content: ""; position: absolute; inset: -14px; border: 1px dashed rgba(var(--scene-rgb), .22); border-radius: inherit; animation: scene-turn 36s linear infinite; }
 .scene-emblem-art { position: relative; z-index: 1; width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 8px 24px rgba(var(--scene-rgb), .34)); animation: scene-emblem-impact .6s .05s cubic-bezier(.19, 1, .22, 1) both; }
 .result-theme-victory .scene-emblem-art, .result-theme-fail .scene-emblem-art { opacity: 0; transform: translateZ(0) scale(0); filter: none; animation: none; will-change: transform, opacity; backface-visibility: hidden; }
-.result-theme-victory.is-art-ready .scene-emblem-art, .result-theme-fail.is-art-ready .scene-emblem-art { animation: scene-emblem-grow 2.7s linear both; }
+.result-theme-victory.is-art-ready .scene-emblem-art, .result-theme-fail.is-art-ready .scene-emblem-art { animation: scene-emblem-grow 3.3s linear both; }
 .result-theme-tie .scene-emblem-art { animation-name: scene-emblem-drift; }
 .scene-shine { position: absolute; z-index: 2; inset: 7% 15%; background: linear-gradient(110deg, transparent 41%, rgba(255,255,255,.11) 48%, rgba(255,255,255,.46) 50%, rgba(255,255,255,.11) 52%, transparent 59%); transform: translateX(-125%) skewX(-8deg); animation: scene-sweep .55s .4s ease-out both; pointer-events: none; mask-image: linear-gradient(90deg, transparent, #000 18%, #000 82%, transparent); }
 .result-theme-victory .scene-shine, .result-theme-fail .scene-shine { opacity: 0; animation: none; will-change: transform; }
-.result-theme-victory.is-art-ready .scene-shine, .result-theme-fail.is-art-ready .scene-shine { opacity: 1; animation: scene-sweep .8s 2.7s ease-out both; }
+.result-theme-victory.is-art-ready .scene-shine, .result-theme-fail.is-art-ready .scene-shine { opacity: 1; animation: scene-sweep 1s 3.3s ease-out both; }
 .scene-main h2 { margin: 6px 0 8px; color: #fff9e9; font-size: clamp(24px, 3.4vw, 39px); font-weight: 600; letter-spacing: .13em; text-shadow: 0 0 34px rgba(var(--scene-rgb), .35); animation: scene-rise .35s .2s both; }
 .scene-message { min-height: 24px; margin: 0 auto 26px; max-width: 720px; color: rgba(255, 249, 233, .72); font-size: 13px; line-height: 1.7; animation: scene-rise .35s .28s both; }
 .scene-seats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; text-align: left; }
