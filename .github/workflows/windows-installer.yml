@@ -1,0 +1,43 @@
+name: Windows installer
+
+on:
+  push:
+    branches: [windows-installer]
+    paths:
+      - desktop/**
+      - .github/workflows/windows-installer.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: desktop/src-tauri
+      - name: Install Tauri CLI
+        working-directory: desktop
+        run: npm ci --no-audit --no-fund
+      - name: Generate app icon
+        working-directory: desktop
+        run: npm run tauri icon app-icon.svg
+      - name: Build Windows installer
+        working-directory: desktop
+        run: npm run build
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: dabaokill-windows-installer
+          path: desktop/src-tauri/target/release/bundle/nsis/*-setup.exe
+          if-no-files-found: error
+
