@@ -1,0 +1,14 @@
+{
+  "name": "dabaokill-desktop",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "tauri": "tauri",
+    "prepare:web": "node prepare-web.mjs",
+    "build": "npm run prepare:web && tauri build --bundles nsis"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.4"
+  }
+}
+
