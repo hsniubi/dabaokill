@@ -36,7 +36,8 @@
   }
 
   class Game {
-    constructor(mode = "solo", random = Math.random) {
+    constructor(mode = "solo", random = Math.random, humanCount = 4) {
+      if (mode === "online" && ![2, 3, 4].includes(humanCount)) throw new Error("联机真人数量必须为 2～4 人");
       this.mode = mode;
       this.random = random;
       this.nextId = 1;
@@ -52,7 +53,7 @@
       this.playerDeck = shuffle(CARDS.flatMap((card) => Array.from({ length: card.count }, () => ({ id: this.id(), key: card.key }))), random);
       this.bossDeck = shuffle(BOSS_CARDS.flatMap((card) => Array.from({ length: card.count }, () => ({ id: this.id(), key: card.key }))), random);
       this.humanPlayerId = mode === "solo" ? Math.floor(random() * 4) + 1 : null;
-      this.players.forEach((player) => { player.isAI = mode === "solo" && player.id !== this.humanPlayerId; });
+      this.players.forEach((player) => { player.isAI = mode === "solo" ? player.id !== this.humanPlayerId : mode === "online" && player.id > humanCount; });
       this.bossDisplay = [];
       this.discard = [];
       this.resolutionQueue = [];
@@ -140,8 +141,8 @@
 
     selectCard(playerId, cardId) {
       if (this.phase !== "select") return false;
-      const chooser = this.currentChooser();
-      if (!chooser || chooser.id !== playerId || chooser.isAI || !chooser.hand.some((card) => card.id === cardId)) return false;
+      const chooser = this.mode === "online" ? this.player(playerId) : this.currentChooser();
+      if (!chooser || chooser.id !== playerId || chooser.isAI || chooser.selected || !chooser.hand.some((card) => card.id === cardId)) return false;
       chooser.selected = cardId;
       this.say(`${chooser.id} 号玩家已盖放一张牌。`);
       this.selectAI();

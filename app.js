@@ -80,6 +80,8 @@
   const tooltipHost = '<div class="card-hover-tooltip" role="tooltip" hidden></div>';
 
   function openStart() {
+    const localFile = window.location?.protocol === "file:";
+    const onlineUrl = localFile && window.DabaoAssetUrl ? `${window.DabaoOnlineConfig?.apiBaseUrl || "http://127.0.0.1:3000"}/online.html` : "online.html";
     app.innerHTML = `
       <div class="start-screen">
         <div class="start-art" aria-hidden="true">${img("dabao.jpg", "start-boss")}</div>
@@ -96,6 +98,10 @@
               <span class="mode-number">02</span><strong>四人手动</strong>
               <span>同一设备依次选牌，四家手牌持续显示。</span><b>开始对局 ↗</b>
             </button>
+            <a class="mode-card mode-card-online" href="${onlineUrl}">
+              <span class="mode-number">03</span><strong>在线联机</strong>
+              <span>2～4 人跨设备同局，空位可由电脑补齐，始终四人对战。</span><b>进入联机大厅 ↗</b>
+            </a>
           </div>
           <button class="start-rules-link" data-action="tab-rules">查看规则与全部玩家牌 ↗</button>
           <p class="start-foot">44 张玩家牌 · 8 张大宝牌 · 三阶段回合</p>

@@ -42,6 +42,8 @@ h1, h2 { font-family: "Noto Serif SC", "Songti SC", "SimSun", serif; }
 .start-lead { max-width: 470px; margin: 0 0 36px; color: #d1dbce; line-height: 1.9; font-size: 16px; }
 .start-options { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .mode-card { min-height: 177px; display: flex; flex-direction: column; align-items: flex-start; text-align: left; padding: 20px; color: var(--paper-light); background: rgba(238, 230, 204, .055); border: 1px solid rgba(238, 230, 204, .23); transition: background .2s, border-color .2s, transform .2s; }
+.mode-card-online { grid-column: 1 / -1; min-height: 126px; text-decoration: none; }
+.mode-card:focus-visible { outline: 3px solid var(--gold-light); outline-offset: 3px; }
 .mode-card:hover { background: rgba(238, 230, 204, .12); border-color: var(--gold-light); transform: translateY(-3px); }
 .mode-number { color: var(--gold-light); font: 12px Georgia, serif; }
 .mode-card strong { margin: 14px 0 6px; font-family: "Noto Serif SC", "Songti SC", serif; font-size: 22px; }
